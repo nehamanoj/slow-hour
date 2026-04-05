@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Clock, Copy, Check } from 'lucide-react'
 import type { Deal, Category } from '@/lib/types'
-import { formatCountdown, computeExpiryTimestamp } from '@/lib/time'
+import { formatCountdown } from '@/lib/time'
 
 // ─── Category system ──────────────────────────────────────────────────────────
 // Each category gets:
@@ -25,13 +25,20 @@ const CATEGORY_STYLES: Record<Category, { dot: string; bg: string; text: string;
 interface DealCardProps {
   deal: Deal
   index: number
+  /**
+   * Absolute expiry timestamp in ms, computed once by the parent and stored
+   * in a stable ref keyed by deal.id. Passed as a prop so this component
+   * never recomputes it — prevents timer resets when the card re-renders or
+   * temporarily unmounts (e.g. filter changes, Surprise Me clicks).
+   */
+  expiresAt: number
   isHighlighted: boolean
   onExpired: () => void
   variant?: 'default' | 'featured'
 }
 
-export default function DealCard({ deal, index, isHighlighted, onExpired, variant = 'default' }: DealCardProps) {
-  const [expiresAt] = useState(() => computeExpiryTimestamp(deal.expiresInHours))
+export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpired, variant = 'default' }: DealCardProps) {
+  // expiresAt comes from the parent's stable ref — never recomputed here
   const [countdown, setCountdown] = useState(() => formatCountdown(expiresAt))
   const [isExpired, setIsExpired] = useState(false)
   const [copied, setCopied] = useState(false)
