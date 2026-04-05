@@ -22,6 +22,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ChevronDown, MapPin, MapPinned } from 'lucide-react'
 import { SUPPORTED_CITIES } from '@/lib/types'
 import { CITY_TIMEZONES } from '@/lib/geo'
@@ -90,7 +91,7 @@ export default function TopBar({ city, detectedCity, isDetected }: TopBarProps) 
           >
 
             {/* Logo + wordmark */}
-            <a href="/" className="flex items-center gap-2 group" aria-label="Slow Hour home">
+            <Link href="/" className="flex items-center gap-2 group" aria-label="Slow Hour home">
               <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500 group-hover:bg-indigo-600 transition-colors duration-200 shadow-sm shadow-indigo-200/60">
                 <MapPinned className="w-3 h-3 text-white" strokeWidth={2.5} />
               </span>
@@ -100,7 +101,7 @@ export default function TopBar({ city, detectedCity, isDetected }: TopBarProps) 
               <span className="hidden md:block text-xs text-[#999999] font-normal">
                 · for students &amp; all
               </span>
-            </a>
+            </Link>
 
             {/* Right side */}
             <div className="flex items-center gap-2.5">

@@ -42,7 +42,6 @@
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 import { normalizeCity } from '@/lib/geo'
-import { SUPPORTED_CITIES } from '@/lib/types'
 import type { SupportedCity } from '@/lib/types'
 import TopBar from '@/components/TopBar'
 import Hero from '@/components/Hero'

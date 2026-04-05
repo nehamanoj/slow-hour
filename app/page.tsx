@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, MapPinned, Zap, Clock, MapPin } from 'lucide-react'
+import { ArrowRight, MapPinned, Clock } from 'lucide-react'
 
 /**
  * Landing / Splash Page
