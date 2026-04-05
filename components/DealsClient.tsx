@@ -321,9 +321,9 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
         >
           <div className="flex items-center gap-2.5">
             <FlaskConical className="w-4 h-4 text-[#666666]" />
-            <span className="text-sm font-medium text-[#404040]">Demo panel</span>
+            <span className="text-sm font-medium text-[#404040]">Add Deal</span>
             <span className="text-xs text-[#999999] hidden sm:inline">
-              · add a test deal to showcase live expiry
+              · add a deal to see live
             </span>
           </div>
           <ChevronDown
@@ -336,7 +336,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
 
             {/* How-to callout */}
             <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mt-4 mb-5 text-xs text-indigo-700 leading-relaxed">
-              <p className="font-semibold mb-1.5">How to demo deal expiry live:</p>
+              <p className="font-semibold mb-1.5">Add Deal live:</p>
               <ol className="list-decimal list-inside space-y-1 text-indigo-600">
                 <li>Fill in a deal title + business name below</li>
                 <li>Set &ldquo;Expires in&rdquo; to <strong>1–2 minutes</strong></li>
