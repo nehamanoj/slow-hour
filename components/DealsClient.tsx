@@ -417,7 +417,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
             <FlaskConical className="w-4 h-4 text-[#666666]" />
             <span className="text-sm font-medium text-[#404040]">Add Deal</span>
             <span className="text-xs text-[#999999] hidden sm:inline">
-              · visible to everyone on the site
+              · add urgent deals quickly
             </span>
           </div>
           <ChevronDown
@@ -429,7 +429,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
           <div className="px-6 pb-6 border-t border-dashed border-[#C8C8C8]">
 
             <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mt-4 mb-5 text-xs text-indigo-700 leading-relaxed">
-              <p className="font-semibold mb-1">Add a deal — visible to everyone</p>
+              <p className="font-semibold mb-1">Add a deal — as urgent as it is</p>
               <p className="text-indigo-600">
                 Fill in title + business name, then press <kbd className="bg-white border border-indigo-200 rounded px-1 font-mono">↵ Enter</kbd> — the deal appears instantly for all visitors and starts counting down live.
               </p>

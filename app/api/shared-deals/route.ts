@@ -50,11 +50,25 @@ function cityKey(city: string) {
   return `shared-deals:${city.toLowerCase().replace(/\s+/g, '-')}`
 }
 
+/*
+ * kvImport: uses new Function() so Turbopack/webpack cannot statically
+ * analyse the import specifier. This prevents "Module not found" warnings
+ * when @vercel/kv isn't installed locally (the package is only needed in
+ * production where Vercel installs it automatically). The try/catch below
+ * handles the runtime fallback to in-memory when the package is absent.
+ */
+// eslint-disable-next-line @typescript-eslint/no-implied-eval
+const kvImport = new Function('m', 'return import(m)')
+
 async function fetchCity(city: string): Promise<SharedDeal[]> {
   if (hasKV) {
-    const { kv } = await import('@vercel/kv')
-    const deals = await kv.get<SharedDeal[]>(cityKey(city)) ?? []
-    return deals.filter(d => d.expiresAt > Date.now())
+    try {
+      const { kv } = await kvImport('@vercel/kv')
+      const deals = await kv.get<SharedDeal[]>(cityKey(city)) ?? []
+      return deals.filter((d: SharedDeal) => d.expiresAt > Date.now())
+    } catch {
+      // @vercel/kv not installed locally — fall through to in-memory store
+    }
   }
   return memStore.filter(
     d => d.city.toLowerCase() === city.toLowerCase() && d.expiresAt > Date.now()
@@ -63,21 +77,25 @@ async function fetchCity(city: string): Promise<SharedDeal[]> {
 
 async function persistDeal(deal: SharedDeal): Promise<void> {
   if (hasKV) {
-    const { kv } = await import('@vercel/kv')
-    const key = cityKey(deal.city)
-    const existing = await kv.get<SharedDeal[]>(key) ?? []
+    try {
+      const { kv } = await kvImport('@vercel/kv')
+      const key = cityKey(deal.city)
+      const existing = await kv.get<SharedDeal[]>(key) ?? []
 
-    // Deduplicate + evict expired in one pass
-    const now = Date.now()
-    const updated = existing.filter(d => d.expiresAt > now && d.id !== deal.id)
-    updated.push(deal)
+      // Deduplicate + evict expired in one pass
+      const now = Date.now()
+      const updated = existing.filter((d: SharedDeal) => d.expiresAt > now && d.id !== deal.id)
+      updated.push(deal)
 
-    // TTL on the KV key = 24h (deals themselves carry their own expiresAt)
-    await kv.set(key, updated, { ex: 86400 })
-  } else {
-    if (!memStore.find(d => d.id === deal.id)) {
-      memStore.push(deal)
+      // TTL on the KV key = 24h (deals themselves carry their own expiresAt)
+      await kv.set(key, updated, { ex: 86400 })
+      return
+    } catch {
+      // @vercel/kv not installed locally — fall through to in-memory store
     }
+  }
+  if (!memStore.find(d => d.id === deal.id)) {
+    memStore.push(deal)
   }
 }
 

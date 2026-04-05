@@ -23,7 +23,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronDown, MapPin, MapPinned } from 'lucide-react'
+import { ChevronDown, MapPin } from 'lucide-react'
 import { SUPPORTED_CITIES } from '@/lib/types'
 import { CITY_TIMEZONES } from '@/lib/geo'
 import type { SupportedCity, WeatherData } from '@/lib/types'
@@ -98,14 +98,14 @@ export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopB
         <div className="max-w-6xl mx-auto pointer-events-auto">
 
           {/* ── The floating pill ─────────────────────────────────────────── */}
-          <div className="bg-white/92 backdrop-blur-2xl border border-[#E0E0E0]/90 rounded-2xl shadow-lg shadow-black/[0.07] px-4 sm:px-5 h-13 flex items-center justify-between"
+          <div className="bg-white/92 backdrop-blur-2xl border border-[#E0E0E0]/90 rounded-full shadow-lg shadow-black/[0.07] px-4 sm:px-5 h-13 flex items-center justify-between"
             style={{ height: '52px' }}
           >
 
             {/* Logo + wordmark */}
             <Link href="/" className="flex items-center gap-2 group" aria-label="Slow Hour home">
-              <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500 group-hover:bg-indigo-600 transition-colors duration-200 shadow-sm shadow-indigo-200/60">
-                <MapPinned className="w-3 h-3 text-white" strokeWidth={2.5} />
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#080808] group-hover:bg-indigo-600 transition-colors duration-200 shadow-sm">
+                <MapPin className="w-3 h-3 text-white" strokeWidth={2.5} />
               </span>
               <span className="text-sm font-semibold tracking-tight text-[#080808] group-hover:text-indigo-600 transition-colors duration-200">
                 Slow Hour

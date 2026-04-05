@@ -2,6 +2,16 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   /**
+   * serverExternalPackages: tells Next.js/Turbopack NOT to bundle @vercel/kv.
+   * Instead, Node resolves it at runtime via require(). This stops Turbopack
+   * from emitting "Module not found" warnings when the package isn't installed
+   * locally. On Vercel, the package IS installed (it's in package.json and
+   * Vercel runs npm install), so it resolves fine in production. The try/catch
+   * in shared-deals/route.ts handles the local dev fallback to in-memory store.
+   */
+  serverExternalPackages: ['@vercel/kv'],
+
+  /**
    * Deliberately lean config — no unnecessary plugins or overrides.
    *
    * Architecture notes (for interview discussion):

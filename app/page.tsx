@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, MapPinned, Clock } from 'lucide-react'
+import { ArrowRight, MapPin, Clock } from 'lucide-react'
 
 /**
  * Landing / Splash Page
@@ -50,12 +50,12 @@ export default function LandingPage() {
       <div className="sticky top-4 z-50 px-4 sm:px-6 pointer-events-none">
         <div className="max-w-6xl mx-auto pointer-events-auto">
           <header
-            className="bg-white/92 backdrop-blur-2xl border border-[#E0E0E0]/90 rounded-2xl shadow-lg shadow-black/[0.07] px-4 sm:px-5 flex items-center justify-between"
+            className="bg-white/92 backdrop-blur-2xl border border-[#E0E0E0]/90 rounded-full shadow-lg shadow-black/[0.07] px-4 sm:px-5 flex items-center justify-between"
             style={{ height: '52px' }}
           >
             <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500 shadow-sm shadow-indigo-200/60">
-                <MapPinned className="w-3 h-3 text-white" strokeWidth={2.5} />
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#080808] shadow-sm">
+                <MapPin className="w-3 h-3 text-white" strokeWidth={2.5} />
               </span>
               <span className="text-sm font-semibold tracking-tight text-[#080808]">Slow Hour</span>
               <span className="hidden sm:block text-xs text-[#999999] font-normal">· for students &amp; all</span>
@@ -90,7 +90,7 @@ export default function LandingPage() {
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-500" />
                 </span>
                 <span className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#666666]">
-                  Real-time · 5 cities
+                  Real-time · Made for where you are
                 </span>
               </span>
               <div className="hidden sm:flex items-center gap-1.5" aria-hidden>
