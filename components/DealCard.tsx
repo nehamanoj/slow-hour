@@ -135,7 +135,10 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
             <h3 className="text-2xl sm:text-3xl font-light tracking-tight text-[#0C0C0C] leading-snug mb-2">
               {deal.title}
             </h3>
-            <p className="text-sm font-medium text-[#A3A3A3]">{deal.business}</p>
+            <p className="text-sm font-medium text-[#A3A3A3] mb-1">{deal.business}</p>
+            {deal.description && (
+              <p className="text-sm text-[#A3A3A3] leading-relaxed">{deal.description}</p>
+            )}
           </div>
 
           {/* Footer row */}

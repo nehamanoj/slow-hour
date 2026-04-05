@@ -1,52 +1,102 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * POST /api/shared-deals  — broadcast a new custom deal to all connected clients
- * GET  /api/shared-deals  — fetch all active shared deals for a given city
+ * POST /api/shared-deals  — broadcast a new deal to all connected clients
+ * GET  /api/shared-deals  — fetch all active shared deals for a city
  *
- * ARCHITECTURE NOTE — in-process store:
- * This uses a module-level array, which persists across requests within the
- * same Node.js instance. In a multi-instance production deployment (Vercel
- * auto-scaling) deals posted to one instance won't appear on others.
+ * STORAGE STRATEGY — two-tier with automatic fallback:
  *
- * For production: swap this for Vercel KV or Upstash Redis — same API shape,
- * just replace the array operations with kv.lpush / kv.lrange.
- * For a single-region demo this is zero-config and completely sufficient.
+ * Tier 1 (production): Vercel KV (Redis)
+ *   Deals are written to a KV key per city. Because KV is a shared,
+ *   persistent store outside any single serverless instance, every
+ *   Vercel function replica reads and writes the same data — so a deal
+ *   added from Houston is immediately visible to a visitor in California.
  *
- * This route intentionally does NOT set `export const runtime = 'edge'`
- * because Edge isolates are stateless — module-level data would not persist.
+ *   To enable: Vercel dashboard → your project → Storage → Create KV →
+ *   Connect to project. Vercel auto-injects KV_REST_API_URL and
+ *   KV_REST_API_TOKEN as env vars. Redeploy and cross-user sync works.
+ *
+ * Tier 2 (local dev / KV not configured): in-process memory
+ *   Falls back to a module-level array. Works within a single Node.js
+ *   instance — fine for local development, not for cross-user sharing on
+ *   a multi-instance deployment.
+ *
+ * This pattern — code-level abstraction with env-var detection — is how
+ * you'd pitch this to a customer: "zero extra infrastructure for dev,
+ * one dashboard click to go production-grade."
  */
 
 export type SharedDeal = {
-  id: string
-  title: string
-  business: string
+  id:          string
+  title:       string
+  business:    string
   description: string
-  city: string
-  category: string
-  discount: string
-  emoji: string
-  /** Absolute UTC timestamp in ms — consistent across all clients */
-  expiresAt: number
+  city:        string
+  category:    string
+  discount:    string
+  emoji:       string
+  /** Absolute UTC ms timestamp — all clients see the same countdown */
+  expiresAt:   number
 }
 
-// Module-level store. Lives as long as the serverless function instance is warm.
-const store: SharedDeal[] = []
+// ── Storage abstraction ───────────────────────────────────────────────────────
 
-function evictExpired() {
-  const now = Date.now()
-  let i = store.length
-  while (i--) {
-    if (store[i].expiresAt <= now) store.splice(i, 1)
+const hasKV = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+
+// In-memory fallback — single instance only
+const memStore: SharedDeal[] = []
+
+function cityKey(city: string) {
+  return `shared-deals:${city.toLowerCase().replace(/\s+/g, '-')}`
+}
+
+async function fetchCity(city: string): Promise<SharedDeal[]> {
+  if (hasKV) {
+    const { kv } = await import('@vercel/kv')
+    const deals = await kv.get<SharedDeal[]>(cityKey(city)) ?? []
+    return deals.filter(d => d.expiresAt > Date.now())
+  }
+  return memStore.filter(
+    d => d.city.toLowerCase() === city.toLowerCase() && d.expiresAt > Date.now()
+  )
+}
+
+async function persistDeal(deal: SharedDeal): Promise<void> {
+  if (hasKV) {
+    const { kv } = await import('@vercel/kv')
+    const key = cityKey(deal.city)
+    const existing = await kv.get<SharedDeal[]>(key) ?? []
+
+    // Deduplicate + evict expired in one pass
+    const now = Date.now()
+    const updated = existing.filter(d => d.expiresAt > now && d.id !== deal.id)
+    updated.push(deal)
+
+    // TTL on the KV key = 24h (deals themselves carry their own expiresAt)
+    await kv.set(key, updated, { ex: 86400 })
+  } else {
+    if (!memStore.find(d => d.id === deal.id)) {
+      memStore.push(deal)
+    }
   }
 }
 
+function evictMemExpired() {
+  const now = Date.now()
+  let i = memStore.length
+  while (i--) {
+    if (memStore[i].expiresAt <= now) memStore.splice(i, 1)
+  }
+}
+
+// ── Route handlers ────────────────────────────────────────────────────────────
+
 export async function GET(req: NextRequest) {
-  evictExpired()
-  const city = req.nextUrl.searchParams.get('city') ?? ''
-  const deals = city
-    ? store.filter(d => d.city.toLowerCase() === city.toLowerCase())
-    : store
+  if (!hasKV) evictMemExpired()
+
+  const city  = req.nextUrl.searchParams.get('city') ?? ''
+  const deals = await fetchCity(city)
+
   return NextResponse.json(deals)
 }
 
@@ -58,13 +108,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    evictExpired()
-
-    // Idempotent — ignore duplicates (same user might POST on reconnect)
-    if (!store.find(d => d.id === body.id)) {
-      store.push(body)
-    }
-
+    await persistDeal(body)
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })

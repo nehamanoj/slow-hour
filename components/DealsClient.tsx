@@ -86,6 +86,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
   const [demoOpen, setDemoOpen] = useState(false)
   const [formTitle,    setFormTitle]    = useState('')
   const [formBusiness, setFormBusiness] = useState('')
+  const [formCity,     setFormCity]     = useState<SupportedCity>(city)
   const [formCategory, setFormCategory] = useState<Category>('Food')
   const [formDiscount, setFormDiscount] = useState('')
   const [formDesc,     setFormDesc]     = useState('')
@@ -144,8 +145,14 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
 
   // ── Merge all deal sources, deduplicate by id ───────────────────────────
   // Server deals take priority so their server-stamped expiresAt is canonical.
+  // customDeals are city-filtered here so a deal added for New York doesn't
+  // bleed into the Houston feed — each deal is only shown in its target city.
   const seen = new Set<string>()
-  const allActive = [...serverDeals, ...customDeals, ...initialDeals]
+  const allActive = [
+    ...serverDeals,
+    ...customDeals.filter(d => d.city === city),
+    ...initialDeals,
+  ]
     .filter(d => !expiredIds.has(d.id))
     .filter(d => {
       if (seen.has(d.id)) return false
@@ -187,8 +194,8 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
       id,
       title:          formTitle.trim(),
       business:       formBusiness.trim(),
-      description:    formDesc.trim() || 'Added live.',
-      city,
+      description:    formDesc.trim() || '',
+      city:           formCity,
       category:       formCategory,
       discount:       formDiscount.trim() || 'DEAL',
       expiresInHours: minutes / 60,
@@ -215,6 +222,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
     // Reset form
     setFormTitle(''); setFormBusiness('')
     setFormDiscount(''); setFormDesc(''); setFormMinutes('2')
+    setFormCity(city)
   }
 
   // Pressing Enter in any form field triggers add (if required fields are filled)
@@ -472,6 +480,21 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
                 >
                   {CATEGORIES.map(c => (
                     <option key={c} value={c}>{CATEGORY_EMOJI[c]} {c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold tracking-[0.1em] uppercase text-[#666666] mb-1.5">
+                  City
+                </label>
+                <select
+                  value={formCity}
+                  onChange={e => setFormCity(e.target.value as SupportedCity)}
+                  className="w-full text-sm px-4 py-2.5 border border-[#C8C8C8] rounded-xl bg-white text-[#080808] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition"
+                >
+                  {SUPPORTED_CITIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
