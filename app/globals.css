@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+
+/* ─── Design Tokens ───────────────────────────────────────────────────────── */
+:root {
+  --bg:          #FAFAF9;   /* warm off-white — not clinical, not dingy */
+  --surface:     #FFFFFF;   /* card surfaces */
+  --fg:          #080808;   /* near-black — richer contrast than before */
+  --fg-2:        #1E1E1E;   /* secondary display text */
+  --fg-body:     #404040;   /* body copy */
+  --fg-muted:    #666666;   /* tertiary / labels — was #A3A3A3, more readable */
+  --fg-faint:    #999999;   /* timestamps, extras — replaced bare #A3A3A3 */
+  --border:      #C8C8C8;   /* dividers — more visible than old #E8E8E8 */
+  --border-soft: #E0E0E0;   /* card borders */
+  --accent:      #4F46E5;   /* indigo primary */
+  --accent-bg:   #EEF2FF;   /* indigo tint */
+}
+
+/* ─── Base Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  /* Clean, no texture — white space IS the design */
+}
+
+/* ─── Typography base ─────────────────────────────────────────────────────── */
+/*
+  DM Sans loaded via next/font — variable is --font-dm.
+  We tighten letter-spacing for display sizes to feel more Apple/editorial.
+*/
+h1, h2, h3, h4 {
+  letter-spacing: -0.025em;
+  font-weight: 300;
+}
+
+/* ─── Animation initial states ────────────────────────────────────────────── */
+/*
+  Must set opacity:0 in CSS so elements are invisible before animation fires.
+  Without this, there's a 1-frame flash of full-opacity content.
+*/
+.animate-blur-in,
+.animate-blur-in-d1,
+.animate-blur-in-d2,
+.animate-blur-in-d3,
+.animate-fade-up,
+.animate-fade-up-d1,
+.animate-fade-up-d2 {
+  opacity: 0;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #d4d4d4; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+/* ─── Text selection ──────────────────────────────────────────────────────── */
+::selection { background-color: #e0e7ff; color: #3730a3; }
+
+/* ─── Focus ───────────────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+/* ─── Utility: thin horizontal rule ──────────────────────────────────────── */
+.rule { height: 1px; background: var(--border); width: 100%; }
