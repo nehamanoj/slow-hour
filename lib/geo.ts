@@ -31,6 +31,22 @@ export const CITY_COORDS: Record<SupportedCity, { lat: number; lon: number }> = 
 }
 
 /**
+ * Returns true if a raw city string resolves to one of our supported cities.
+ * Uses the same matching logic as normalizeCity so the two never disagree.
+ * Use this in page.tsx to decide whether to show the "quiet city" state.
+ */
+export function isSupportedCity(city: string | null): boolean {
+  if (!city) return false
+  const lower = city.toLowerCase()
+  return SUPPORTED_CITIES.some(
+    (c) =>
+      c.toLowerCase() === lower ||
+      lower.includes(c.toLowerCase()) ||
+      c.toLowerCase().includes(lower)
+  )
+}
+
+/**
  * Normalize a raw city string (from Vercel's geo header) to one of our
  * supported cities. Falls back to Houston if no match is found.
  *

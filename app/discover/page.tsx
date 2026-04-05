@@ -41,12 +41,13 @@
 
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
-import { normalizeCity } from '@/lib/geo'
+import { normalizeCity, isSupportedCity } from '@/lib/geo'
 import type { SupportedCity } from '@/lib/types'
 import TopBar from '@/components/TopBar'
 import Hero from '@/components/Hero'
 import DealsGrid from '@/components/DealsGrid'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
+import UnsupportedCity from '@/components/UnsupportedCity'
 
 // Declares this entire route as edge-rendered.
 // Applies to all server components in this subtree.
@@ -76,44 +77,65 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
   // Only available on Vercel deployments; returns null in local dev.
   const rawVercelCity = headersList.get('x-vercel-ip-city')
   const vercelCity = rawVercelCity ? decodeURIComponent(rawVercelCity) : null
+
+  // detectedCity: the nearest *supported* city for data-fetching purposes.
+  // Falls back to Houston when the geo city is unsupported or null.
   const detectedCity = normalizeCity(vercelCity)
 
   // User can override city via ?city= query param (city picker in TopBar).
   // We normalise it through the same function to handle casing / fuzzy matches.
   const requestedCity = params.city ? normalizeCity(params.city) : null
-
-  // isDetected = true when showing the user's geo-detected city (not a manual override).
-  // Passed to TopBar so it can show "Houston detected" vs "New York" (no label).
   const isUserOverride = requestedCity !== null
   const city: SupportedCity = requestedCity ?? detectedCity
+
+  // isUnsupportedGeo: true when the user's real city (e.g. "Fremont") is
+  // detected by Vercel's edge network but we don't have deals data for it yet,
+  // AND the user hasn't manually selected a city via the picker.
+  // In this case we show the "quiet city" state instead of an empty feed.
+  const isUnsupportedGeo =
+    !isUserOverride && vercelCity !== null && !isSupportedCity(vercelCity)
+
+  // displayCity: what we show in the UI. For unsupported geos we show the
+  // real detected city ("Fremont") so the user sees their actual location —
+  // not the silent Houston fallback that would feel broken.
+  const displayCity = isUnsupportedGeo ? (vercelCity ?? city) : city
 
   return (
     <main className="min-h-screen">
       {/*
         TopBar: 'use client' — needs useEffect for live clock and city picker state.
-        It receives city as a prop so the server decides the city; the client just displays it.
-        Weather is fetched client-side via /api/weather after mount (non-blocking).
+        rawCity is the real detected city name for the pill label when it's an
+        unsupported geo — prevents the TopBar from incorrectly showing "Houston".
+        Weather/clock are suppressed for unsupported cities (no coords/timezone).
       */}
-      <TopBar city={city} detectedCity={detectedCity} isDetected={!isUserOverride} />
+      <TopBar
+        city={city}
+        detectedCity={detectedCity}
+        isDetected={!isUserOverride}
+        rawCity={isUnsupportedGeo ? displayCity : undefined}
+      />
 
       {/*
         Hero: pure server component — no async, no data.
         Renders synchronously into the first HTML chunk.
-        This is our LCP element: the big headline paints before any data loads.
-        AnimatedCity inside Hero is a thin client component that only handles
-        the cross-fade transition when city changes — the rest stays server-rendered.
+        displayCity ensures "Fremont" appears in the headline for unsupported
+        geos, not the silent "Houston" fallback.
       */}
-      <Hero city={city} />
+      <Hero city={displayCity} />
 
       {/*
-        Suspense boundary: the split between static and dynamic content.
-        Everything inside (DealsGrid → DealsClient) is async and streams as chunk 2.
-        LoadingSkeleton is the fallback — it renders synchronously in chunk 1,
-        holding layout space so there's zero CLS when the real content arrives.
+        Deals section: two possible states.
+        A) Normal — stream in deals for a supported city.
+        B) Quiet city — user's geo is unsupported; show a friendly message
+           and links to the cities we do cover instead of an empty grid.
       */}
-      <Suspense fallback={<LoadingSkeleton />}>
-        <DealsGrid city={city} />
-      </Suspense>
+      {isUnsupportedGeo ? (
+        <UnsupportedCity city={displayCity} />
+      ) : (
+        <Suspense fallback={<LoadingSkeleton />}>
+          <DealsGrid city={city} />
+        </Suspense>
+      )}
     </main>
   )
 }

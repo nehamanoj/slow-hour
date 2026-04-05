@@ -32,9 +32,21 @@ interface TopBarProps {
   city: SupportedCity
   detectedCity: SupportedCity
   isDetected: boolean
+  /**
+   * When the user's real geo city is unsupported (e.g. "Fremont"), this is
+   * the raw detected city name to show in the pill instead of the fallback
+   * supported city. Weather and clock are suppressed when this is set since
+   * we don't have coordinates or timezone data for unsupported cities.
+   */
+  rawCity?: string
 }
 
-export default function TopBar({ city, detectedCity, isDetected }: TopBarProps) {
+export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopBarProps) {
+  // When rawCity is set, the user is in an unsupported city.
+  // We show rawCity in the pill but suppress weather/clock — we have no
+  // coords or timezone for cities outside our supported set.
+  const isUnsupportedCity = rawCity !== undefined
+  const pillLabel = rawCity ?? city
   const router = useRouter()
   const [time, setTime] = useState('')
   const [weather, setWeather] = useState<WeatherData | null>(null)
@@ -106,16 +118,16 @@ export default function TopBar({ city, detectedCity, isDetected }: TopBarProps) 
             {/* Right side */}
             <div className="flex items-center gap-2.5">
 
-              {/* Weather */}
-              {weather && (
+              {/* Weather — hidden for unsupported cities (no coords available) */}
+              {!isUnsupportedCity && weather && (
                 <span className="hidden sm:flex items-center gap-1 text-xs text-[#666666] animate-fade-in bg-[#F5F5F5] px-2.5 py-1 rounded-full">
                   <span>{weather.icon}</span>
                   <span className="font-mono tabular-nums">{weather.temp}°</span>
                 </span>
               )}
 
-              {/* Local time */}
-              {time && (
+              {/* Local time — hidden for unsupported cities (no timezone mapping) */}
+              {!isUnsupportedCity && time && (
                 <span className="hidden sm:block text-xs font-mono tabular-nums text-[#666666] bg-[#F5F5F5] px-2.5 py-1 rounded-full">
                   {time}
                 </span>
@@ -136,7 +148,7 @@ export default function TopBar({ city, detectedCity, isDetected }: TopBarProps) 
                     </span>
                   )}
                   <MapPin className="w-3 h-3 text-white/70" />
-                  <span>{city}</span>
+                  <span>{pillLabel}</span>
                   <ChevronDown className={`w-3 h-3 text-white/60 transition-transform duration-200 ${showPicker ? 'rotate-180' : ''}`} />
                 </button>
 

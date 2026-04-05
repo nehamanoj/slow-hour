@@ -297,7 +297,7 @@ export default function LandingPage() {
       {/* ── Footer ───────────────────────────────────────────────────────── */}
       <footer className="border-t border-[#E0E0E0] py-5">
         <div className="max-w-6xl mx-auto px-6 sm:px-10 flex items-center justify-between">
-          <span className="text-xs text-[#C8C8C8]">Slow Hour · Vercel SA Assessment</span>
+          <span className="text-xs text-[#C8C8C8]">Slow Hour</span>
           <span className="text-xs text-[#C8C8C8]">Next.js Edge Runtime</span>
         </div>
       </footer>

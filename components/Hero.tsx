@@ -107,11 +107,13 @@ export default function Hero({ city }: HeroProps) {
         {/* Sub-copy — AnimatedCity gives the city name its indigo color pill */}
         <div className="max-w-lg">
           <p className="text-base sm:text-lg font-light text-[#404040] leading-relaxed">
-            Student-exclusive offers in
+            Student-exclusive offers in{' '}
             {/*
               AnimatedCity: 'use client' component — only this word is
               interactive. The indigo pill makes it unmistakably clear
               this word is dynamic / personalized to the visitor's location.
+              The {' '} above is intentional — JSX strips whitespace between
+              an inline text node and a component, so we add it explicitly.
             */}
             <AnimatedCity city={city} />,
             ranked by urgency. Discover what&apos;s ending soon — before it&apos;s gone.
