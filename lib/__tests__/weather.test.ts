@@ -20,7 +20,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { fetchWeather } from '../weather'
 import { CITY_COORDS } from '../geo'
-import type { SupportedCity } from '../types'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

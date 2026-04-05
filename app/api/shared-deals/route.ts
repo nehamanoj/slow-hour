@@ -64,7 +64,8 @@ async function fetchCity(city: string): Promise<SharedDeal[]> {
   if (hasKV) {
     try {
       const { kv } = await kvImport('@vercel/kv')
-      const deals = await kv.get<SharedDeal[]>(cityKey(city)) ?? []
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const deals = ((await kv.get(cityKey(city))) as SharedDeal[] | null) ?? []
       return deals.filter((d: SharedDeal) => d.expiresAt > Date.now())
     } catch {
       // @vercel/kv not installed locally — fall through to in-memory store
@@ -80,7 +81,8 @@ async function persistDeal(deal: SharedDeal): Promise<void> {
     try {
       const { kv } = await kvImport('@vercel/kv')
       const key = cityKey(deal.city)
-      const existing = await kv.get<SharedDeal[]>(key) ?? []
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const existing = ((await kv.get(key)) as SharedDeal[] | null) ?? []
 
       // Deduplicate + evict expired in one pass
       const now = Date.now()

@@ -21,6 +21,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Delete a key from a copy of an object — avoids unused destructuring variables. */
+function omitKey<T extends object>(obj: T, key: keyof T): Partial<T> {
+  const copy = { ...obj } as Partial<T>
+  delete copy[key]
+  return copy
+}
+
 // ─── Module isolation ─────────────────────────────────────────────────────────
 // Re-import the module fresh for each test to reset the in-memory store.
 
@@ -215,28 +224,28 @@ describe('POST /api/shared-deals — invalid inputs', () => {
 
   it('returns 400 when body is missing id', async () => {
     const { POST } = await freshHandlers()
-    const { id: _id, ...noId } = makeDeal()
+    const noId = omitKey(makeDeal(), 'id')
     const res = await POST(makePostRequest(noId))
     expect(res.status).toBe(400)
   })
 
   it('returns 400 when body is missing title', async () => {
     const { POST } = await freshHandlers()
-    const { title: _t, ...noTitle } = makeDeal() as Record<string, unknown>
+    const noTitle = omitKey(makeDeal(), 'title')
     const res = await POST(makePostRequest(noTitle))
     expect(res.status).toBe(400)
   })
 
   it('returns 400 when body is missing business', async () => {
     const { POST } = await freshHandlers()
-    const { business: _b, ...noBusiness } = makeDeal() as Record<string, unknown>
+    const noBusiness = omitKey(makeDeal(), 'business')
     const res = await POST(makePostRequest(noBusiness))
     expect(res.status).toBe(400)
   })
 
   it('returns 400 when body is missing expiresAt', async () => {
     const { POST } = await freshHandlers()
-    const { expiresAt: _e, ...noExpiry } = makeDeal() as Record<string, unknown>
+    const noExpiry = omitKey(makeDeal(), 'expiresAt')
     const res = await POST(makePostRequest(noExpiry))
     expect(res.status).toBe(400)
   })
