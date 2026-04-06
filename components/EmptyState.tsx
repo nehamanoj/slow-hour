@@ -1,9 +1,8 @@
-/**
- * EmptyState — clean, editorial empty state.
- *
- * Matches the new minimal aesthetic: no colored icon containers,
- * just typography and subtle actions. Think Apple's "nothing here yet" screens.
- */
+// empty state — shown when no deals match the active filter or city.
+//
+// two states:
+//   filtered → "no matches" + "show all deals" button
+//   unfiltered → "nothing here yet" + city switcher buttons
 
 import { SUPPORTED_CITIES } from '@/lib/types'
 import type { SupportedCity } from '@/lib/types'
@@ -21,24 +20,24 @@ export default function EmptyState({ filter, city, onClearFilter, onChangeCity }
 
   return (
     <div className="flex flex-col items-start py-20">
-      {/* Overline */}
+      {/* overline */}
       <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-[#A3A3A3] mb-4">
         {isFiltered ? 'No matches' : 'Nothing here yet'}
       </p>
 
-      {/* Headline */}
+      {/* headline */}
       <h3 className="text-3xl font-light tracking-tight text-[#0C0C0C] mb-3">
         It&apos;s a little quiet here
       </h3>
 
-      {/* Sub-copy */}
+      {/* sub-copy */}
       <p className="text-base font-light text-[#A3A3A3] max-w-sm leading-relaxed mb-10">
         {isFiltered
           ? `No ${filter} deals are active right now. Clear the filter to see everything.`
           : `No deals near ${city} at the moment. Try exploring another city.`}
       </p>
 
-      {/* Actions */}
+      {/* actions */}
       <div className="flex flex-wrap gap-3">
         {isFiltered && (
           <button

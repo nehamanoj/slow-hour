@@ -52,7 +52,7 @@ const config: Config = {
         },
       },
       animation: {
-        // Spring easing: fast start, smooth deceleration (Apple's preferred curve)
+        // Spring easing: fast start, smooth deceleration (designers typically use for apple's ios preferred curve)
         'blur-in':    'blur-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both',
         'blur-in-d1': 'blur-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both',
         'blur-in-d2': 'blur-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both',

@@ -4,7 +4,7 @@ import { ArrowRight, MapPin, Clock } from 'lucide-react'
 /**
  * Landing / Splash Page
  *
- * Statically rendered — no data fetching, no edge runtime needed.
+ * Statically rendered — no data fetching, no edge runtime needed because no dynamic data is stored on this pg.
  * CDN-cached at the edge forever (until next deploy).
  *
  * Layout: two-column on desktop.
@@ -173,7 +173,6 @@ export default function LandingPage() {
           */}
           <div className="hidden lg:block relative">
 
-            {/* Slight tilt + shadow wrapper — makes it feel like a "screenshot" */}
             <div className="relative space-y-3 animate-blur-in-d1">
 
               {/* Header chip row */}
@@ -183,8 +182,10 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              {/* Featured card (first mock) */}
-              <div className={`rounded-3xl overflow-hidden shadow-md shadow-orange-100/60 bg-orange-50/40 border border-white/70`}>
+              {/* Featured card — relative wrapper lets the glow bleed outside overflow-hidden */}
+              <div className="relative">
+                <div className="absolute -inset-4 -z-10 bg-gradient-to-br from-rose-200/30 via-orange-100/20 to-transparent rounded-[2.5rem] blur-2xl pointer-events-none" aria-hidden />
+              <div className="rounded-3xl overflow-hidden shadow-md shadow-orange-100/60 bg-orange-50/40 border border-white/70">
                 <div className="h-[3px] bg-gradient-to-r from-rose-400 via-red-400 to-orange-400" />
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-3 mb-4">
@@ -209,6 +210,7 @@ export default function LandingPage() {
                     <span className="text-xs text-[#C8C8C8]">Copy</span>
                   </div>
                 </div>
+              </div>
               </div>
 
               {/* 2-card mini grid */}
@@ -241,7 +243,7 @@ export default function LandingPage() {
 
               {/* Bottom label */}
               <p className="text-center text-[11px] text-[#C8C8C8] pt-1">
-                Live preview · updates every session
+                Live Deals · updates in real time
               </p>
 
             </div>
@@ -297,8 +299,8 @@ export default function LandingPage() {
       {/* ── Footer ───────────────────────────────────────────────────────── */}
       <footer className="border-t border-[#E0E0E0] py-5">
         <div className="max-w-6xl mx-auto px-6 sm:px-10 flex items-center justify-between">
-          <span className="text-xs text-[#C8C8C8]">Slow Hour</span>
-          <span className="text-xs text-[#C8C8C8]">Next.js Edge Runtime</span>
+          <span className="text-xs text-[#C8C8C8]">Slow Hour · for students</span>
+          <span className="text-xs text-[#C8C8C8]">Built with care & lots of caffeine by Neha Manoj</span>
         </div>
       </footer>
 

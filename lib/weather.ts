@@ -1,13 +1,9 @@
 import type { WeatherData, SupportedCity } from './types'
 import { CITY_COORDS } from './geo'
 
-/**
- * Interpret WMO weather code into a human-readable condition.
- * Full code table: https://open-meteo.com/en/docs#weathervariables
- *
- * We map to 7 conditions — enough nuance for messaging, simple enough to
- * maintain. Adding more conditions would have diminishing UX returns.
- */
+// maps wmo weather codes to human-readable conditions.
+// full code table: https://open-meteo.com/en/docs#weathervariables
+// 7 conditions is enough nuance for the messages without being annoying to maintain.
 function interpretWeatherCode(code: number): { condition: string; icon: string } {
   if (code === 0)        return { condition: 'Clear',         icon: '☀️' }
   if (code <= 3)         return { condition: 'Partly Cloudy', icon: '⛅' }
@@ -18,16 +14,12 @@ function interpretWeatherCode(code: number): { condition: string; icon: string }
   return                        { condition: 'Stormy',        icon: '⛈️' }
 }
 
-/**
- * Weather-aware deal discovery messages.
- * The idea: if it's raining, lean into "perfect excuse to grab a deal inside".
- * If it's sunny, lean into "get out and explore".
- * Small personalization detail that makes the app feel alive.
- */
+// small contextual message based on weather — rainy → lean into "grab a deal indoors",
+// sunny → "get out and explore". makes the app feel alive without adding complexity.
 function getWeatherMessage(condition: string): string {
   const messages: Record<string, string> = {
     Clear:          '☀️ Great day to get out and explore',
-    'Partly Cloudy':'⛅ Nice enough to check out a deal',
+    'Partly Cloudy':'⛅ Nice enough to check out a deal', //'Partly Cloudy' is in brackets because there is a space in the string. needs more specification.
     Foggy:          '🌫️ Cozy day for a café or study spot',
     Rainy:          '🌧️ Perfect excuse to grab a deal indoors',
     Snowy:          '❄️ Warm up with a local deal nearby',
@@ -37,19 +29,11 @@ function getWeatherMessage(condition: string): string {
   return messages[condition] ?? '🏙️ Deals waiting nearby'
 }
 
-/**
- * Fetch real-time weather for a city using Open-Meteo.
- *
- * Why Open-Meteo?
- * → Completely free, no API key required, CORS-enabled.
- *   Perfect for a demo that shouldn't require env var setup.
- *   In production, we'd use a paid service (Tomorrow.io, OpenWeather) for
- *   SLA guarantees and finer granularity.
- *
- * Caching strategy: revalidate every 10 minutes.
- * Weather is contextual enhancement, not mission-critical data.
- * Stale weather data is acceptable; stale deal data is not.
- */
+// fetch real-time weather via open-meteo — free, no api key, cors-enabled.
+// perfect for a demo. in production we'd use tomorrow.io or openweather for sla guarantees.
+//
+// revalidate every 10 minutes — weather is contextual enhancement, not
+// mission-critical data. stale weather is fine; stale deal data is not.
 export async function fetchWeather(city: SupportedCity): Promise<WeatherData> {
   const coords = CITY_COORDS[city]
 
@@ -62,9 +46,7 @@ export async function fetchWeather(city: SupportedCity): Promise<WeatherData> {
       `&timezone=auto`
 
     const res = await fetch(url, {
-      // Next.js extended fetch: cache weather for 10 minutes server-side.
-      // This means the first request in a 10-min window hits Open-Meteo;
-      // all subsequent requests within that window use the cached response.
+      // next.js extended fetch: cache weather server-side for 10 minutes
       next: { revalidate: 600 },
     })
 
@@ -77,8 +59,7 @@ export async function fetchWeather(city: SupportedCity): Promise<WeatherData> {
 
     return { condition, icon, temp, message: getWeatherMessage(condition) }
   } catch {
-    // Graceful degradation: weather is enhancement, not core functionality.
-    // The app remains fully functional with a sensible default.
+    // graceful degradation — app is fully functional without weather
     return {
       condition: 'Clear',
       icon: '☀️',

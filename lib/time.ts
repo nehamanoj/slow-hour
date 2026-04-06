@@ -1,12 +1,8 @@
-/**
- * Format a live countdown from now until an absolute expiry timestamp.
- *
- * Returns: "1h 23m" / "45m 12s" / "9s" / "Expired"
- *
- * Design decision: we switch from "Xh Xm" to "Xm Xs" format when under
- * 1 hour. This increases urgency perception as the deadline approaches —
- * the same psychological mechanic used by flight booking sites.
- */
+// format a live countdown from now until an absolute expiry timestamp.
+// returns: "1h 23m" / "45m 12s" / "9s" / "Expired"
+//
+// switches to "Xm Xs" below 1 hour — same trick flight booking sites use
+// to make deadlines feel more urgent as they get close.
 export function formatCountdown(expiresAt: number): string {
   const diff = expiresAt - Date.now()
   if (diff <= 0) return 'Expired'
@@ -21,24 +17,15 @@ export function formatCountdown(expiresAt: number): string {
   return `${seconds}s`
 }
 
-/**
- * Convert a relative "hours from now" offset to an absolute Unix timestamp (ms).
- *
- * Called once per DealCard on client mount. This means:
- * - Each browser session gets a fresh countdown
- * - Refreshing the page resets timers (acceptable for a demo)
- * - In production: expiry timestamps would come from the database
- */
+// convert relative "hours from now" to an absolute unix timestamp (ms).
+// called once per dealcard on mount and stored in a stable ref — never
+// recomputed, so countdowns don't reset when a card remounts (e.g. on filter change).
 export function computeExpiryTimestamp(hoursFromNow: number): number {
   return Date.now() + hoursFromNow * 60 * 60 * 1000
 }
 
-/**
- * Determine urgency level for visual styling.
- * ≤ 1h  → 'critical' (red pulse)
- * ≤ 3h  → 'urgent'   (amber)
- * > 3h  → 'normal'   (slate)
- */
+// maps hours remaining to a visual urgency level for styling.
+// ≤ 1h → critical (red pulse), ≤ 3h → urgent (amber), > 3h → normal (slate)
 export function getUrgencyLevel(hoursFromNow: number): 'critical' | 'urgent' | 'normal' {
   if (hoursFromNow <= 1) return 'critical'
   if (hoursFromNow <= 3) return 'urgent'

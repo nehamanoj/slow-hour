@@ -1,24 +1,22 @@
 import type { Deal } from './types'
 
-/**
- * Simulates fetching deals from a database or API.
- *
- * The 1.2s delay is intentional — it makes the Suspense streaming behavior
- * visible during the demo. In production, this would be:
- *   - A Postgres query (Vercel Postgres / Neon)
- *   - A cached API call (with next: { revalidate: 300 })
- *   - A Redis lookup for hot deal data
- *
- * The delay also demonstrates that the static shell (hero, nav) arrives
- * independently of the dynamic content — exactly the point of streaming.
- */
+// simulates fetching deals from a database or api.
+//
+// the 1.2s delay is intentional — makes the suspense streaming behavior
+// visible during the demo. in production this would be:
+//   - a postgres query (vercel postgres / neon)
+//   - a cached api call (with next: { revalidate: 300 })
+//   - a redis lookup for hot deal data
+//
+// the delay also shows that the static shell (hero, nav) arrives
+// independently of the dynamic content — that's the whole point of streaming.
 export async function getDeals(city: string): Promise<Deal[]> {
   await new Promise((res) => setTimeout(res, 1200))
   return mockDeals.filter((d) => d.city === city)
 }
 
-// ─── Mock data: 5–6 deals per city ───────────────────────────────────────────
-// Designed to showcase: varied categories, urgency gradient, realistic copy.
+// mock data: 5–6 deals per city
+// varied categories, urgency gradient, realistic copy.
 
 export const mockDeals: Deal[] = [
   // ── HOUSTON ────────────────────────────────────────────────────────────────

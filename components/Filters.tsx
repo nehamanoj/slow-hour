@@ -1,16 +1,11 @@
 'use client'
 
-/**
- * Filters — tab-style, not pill-style.
- *
- * Design shift: instead of colored pill buttons (which feel heavy),
- * these are minimal text tabs with an underline indicator.
- * Inspired by Apple's tab bars and Linear's segment controls.
- *
- * Active state: bold text + thin underline accent.
- * Inactive: muted gray, hover darkens text.
- * Consistent with the editorial feel of the rest of the app.
- */
+// filters — tab-style, not pill-style.
+//
+// minimal text tabs with an underline indicator instead of colored pill buttons.
+// active state: bold text + thin underline accent.
+// inactive: muted gray, hover darkens text.
+// "ending soon" gets rose color to match the urgency aesthetic.
 
 import { LayoutGrid, UtensilsCrossed, Wine, Calendar, Zap } from 'lucide-react'
 
@@ -59,7 +54,7 @@ export default function Filters({ activeFilter, onChange }: FiltersProps) {
             <Icon className="w-3.5 h-3.5" aria-hidden="true" />
             {label}
 
-            {/* Active underline indicator */}
+            {/* active underline indicator */}
             {active && (
               <span
                 className={`absolute bottom-0 left-0 right-0 h-[1.5px] rounded-full ${

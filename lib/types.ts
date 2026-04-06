@@ -1,4 +1,4 @@
-// ─── Core domain types ────────────────────────────────────────────────────────
+// core domain types
 
 export type Category = 'Food' | 'Drinks' | 'Events' | 'Fitness' | 'Retail' | 'Study'
 
@@ -11,12 +11,11 @@ export type Deal = {
   category: Category
   discount: string
   /**
-   * Hours from "now" until this deal expires.
-   * Stored as a relative offset (not an absolute timestamp) so mock data
-   * feels fresh on every session. The DealCard component converts this to
-   * an absolute timestamp on mount using Date.now().
+   * relative hours offset, not an absolute timestamp — keeps mock data
+   * feeling fresh every session. dealcard converts this to an absolute ms
+   * timestamp on mount via Date.now().
    *
-   * In a real system, this would be an ISO timestamp from the DB.
+   * in production this'd be an iso timestamp from the db.
    */
   expiresInHours: number
   emoji: string
@@ -26,11 +25,11 @@ export type WeatherData = {
   condition: string
   icon: string
   temp: number
-  /** Context-aware message to show in the deals feed header */
+  /** context-aware message shown in the deals feed header */
   message: string
 }
 
-// ─── Supported cities ─────────────────────────────────────────────────────────
+// ─── supported cities ─────────────────────────────────────────────────────────
 
 export const SUPPORTED_CITIES = [
   'Houston',
@@ -42,6 +41,6 @@ export const SUPPORTED_CITIES = [
 
 export type SupportedCity = (typeof SUPPORTED_CITIES)[number]
 
-// ─── Filter options ───────────────────────────────────────────────────────────
+// ─── filter options ───────────────────────────────────────────────────────────
 
 export type FilterId = 'all' | 'food' | 'drinks' | 'events' | 'fitness' | 'ending-soon'

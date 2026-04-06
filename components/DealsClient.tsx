@@ -1,30 +1,27 @@
 'use client'
 
-/**
- * DealsClient — Interactive hydration boundary.
- *
- * Handles:
- *   - Category filter state
- *   - Expired deal tracking → "Missed" section
- *   - Surprise Me random highlight
- *   - City navigation (/discover?city=X)
- *   - Cross-user shared deals (poll /api/shared-deals every 5s)
- *   - Add deal panel (auto-adds on Enter — no button click needed)
- *
- * TIMER STABILITY FIX:
- * expiresAt timestamps are stored in `expiresAtMapRef` (a useRef), keyed by
- * deal.id. They are set once and never overwritten — so even if a DealCard
- * unmounts and remounts (e.g. when switching between "all" and a category
- * filter), it receives the same expiresAt and the countdown continues without
- * resetting. Previously, expiresAt was computed inside DealCard's useState,
- * which re-ran on every remount.
- *
- * CROSS-USER SHARING:
- * When a deal is added via the form it's POSTed to /api/shared-deals.
- * All clients poll that endpoint every 5s and merge results with local deals.
- * Server deals carry an absolute expiresAt timestamp so all viewers see the
- * same countdown regardless of when they loaded the page.
- */
+// dealsclient — interactive hydration boundary.
+//
+// handles:
+//   - category filter state
+//   - expired deal tracking → "missed" section
+//   - surprise me random highlight
+//   - city navigation (/discover?city=X)
+//   - cross-user shared deals (poll /api/shared-deals every 5s)
+//   - add deal panel (auto-adds on Enter — no button click needed)
+//
+// timer stability fix:
+//   expiresAt timestamps are stored in expiresAtMapRef (a useRef), keyed by
+//   deal.id. set once, never overwritten — so even if a dealcard unmounts and
+//   remounts (e.g. switching filters), it gets the same expiresAt and the
+//   countdown continues without resetting. previously expiresAt was computed
+//   inside dealcard's useState, which re-ran on every remount.
+//
+// cross-user sharing:
+//   when a deal is added via the form it's POSTed to /api/shared-deals.
+//   all clients poll that endpoint every 5s and merge results with local deals.
+//   server deals carry an absolute expiresAt so all viewers see the same
+//   countdown regardless of when they loaded the page.
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -58,20 +55,20 @@ const CATEGORY_EMOJI: Record<Category, string> = {
 export default function DealsClient({ initialDeals, city, weather }: DealsClientProps) {
   const router = useRouter()
 
-  // ── Filter / expired state ──────────────────────────────────────────────
+  // ── filter / expired state ──────────────────────────────────────────────
   const [activeFilter, setActiveFilter] = useState('all')
   const [expiredIds, setExpiredIds] = useState<Set<string>>(new Set())
   const [missedDeals, setMissedDeals] = useState<Deal[]>([])
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
 
-  // ── Custom deals added locally ──────────────────────────────────────────
+  // ── custom deals added locally ──────────────────────────────────────────
   const [customDeals, setCustomDeals] = useState<Deal[]>([])
 
-  // ── Deals shared by other users (polled from /api/shared-deals) ─────────
+  // ── deals shared by other users (polled from /api/shared-deals) ─────────
   const [serverDeals, setServerDeals] = useState<Deal[]>([])
 
-  // ── Stable expiry timestamps keyed by deal.id ───────────────────────────
-  // A useRef so writes never trigger re-renders. Once a deal's expiresAt is
+  // stable expiry timestamps keyed by deal.id.
+  // useRef so writes never trigger re-renders. once a deal's expiresAt is
   // set here it never changes — this is what keeps countdown timers stable.
   const expiresAtMapRef = useRef<Record<string, number>>({})
 
@@ -82,7 +79,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
     return expiresAtMapRef.current[deal.id]
   }
 
-  // ── Demo panel state ───────────────────────────────────────────────────
+  // ── demo panel state ───────────────────────────────────────────────────
   const [demoOpen, setDemoOpen] = useState(false)
   const [formTitle,    setFormTitle]    = useState('')
   const [formBusiness, setFormBusiness] = useState('')
@@ -93,7 +90,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
   const [formMinutes,  setFormMinutes]  = useState('2')
   const [justAdded,    setJustAdded]    = useState(false)
 
-  // ── Poll /api/shared-deals every 5s ─────────────────────────────────────
+  // ── poll /api/shared-deals every 5s ─────────────────────────────────────
   useEffect(() => {
     async function poll() {
       try {
@@ -102,7 +99,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
         const data = (await res.json()) as SharedDeal[]
 
         const deals: Deal[] = data.map(d => {
-          // Server's expiresAt is the source of truth — store it so DealCard
+          // server's expiresAt is the source of truth — store it so dealcard
           // gets the same timestamp even if it unmounts/remounts
           expiresAtMapRef.current[d.id] = d.expiresAt
           return {
@@ -129,7 +126,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
     return () => clearInterval(id)
   }, [city])
 
-  // ── Expiry handler ──────────────────────────────────────────────────────
+  // ── expiry handler ──────────────────────────────────────────────────────
   const handleExpired = useCallback((id: string) => {
     setExpiredIds(prev => {
       if (prev.has(id)) return prev
@@ -143,10 +140,9 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
     })
   }, [initialDeals, customDeals, serverDeals])
 
-  // ── Merge all deal sources, deduplicate by id ───────────────────────────
-  // Server deals take priority so their server-stamped expiresAt is canonical.
-  // customDeals are city-filtered here so a deal added for New York doesn't
-  // bleed into the Houston feed — each deal is only shown in its target city.
+  // merge all deal sources, deduplicate by id.
+  // server deals first so their server-stamped expiresAt is canonical.
+  // customDeals filtered by city so a deal added for NY doesn't bleed into Houston.
   const seen = new Set<string>()
   const allActive = [
     ...serverDeals,
@@ -165,7 +161,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
   const restDeals:    Deal[]      = filtered.length > 1 ? filtered.slice(1) : []
   const showFeatured = activeFilter === 'all' && featuredDeal !== null
 
-  // ── Surprise Me ─────────────────────────────────────────────────────────
+  // ── surprise me ─────────────────────────────────────────────────────────
   function handleSurpriseMe() {
     if (filtered.length === 0) return
     const random = filtered[Math.floor(Math.random() * filtered.length)]
@@ -176,12 +172,12 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
     setTimeout(() => setHighlightedId(null), 2500)
   }
 
-  // ── City navigation ──────────────────────────────────────────────────────
+  // ── city navigation ──────────────────────────────────────────────────────
   function changeCity(newCity: SupportedCity) {
     router.push(`/discover?city=${encodeURIComponent(newCity)}`, { scroll: false })
   }
 
-  // ── Add deal — auto-triggered on Enter, no button click needed ──────────
+  // ── add deal — auto-triggered on Enter, no button click needed ──────────
   function handleAddDeal(e?: React.FormEvent) {
     if (e) e.preventDefault()
     if (!formTitle.trim() || !formBusiness.trim()) return
@@ -202,30 +198,30 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
       emoji:          CATEGORY_EMOJI[formCategory],
     }
 
-    // Pin this deal's expiry before adding it so getExpiresAt() is consistent
+    // pin this deal's expiry before adding so getExpiresAt() is consistent
     expiresAtMapRef.current[id] = expiresAt
 
-    // Optimistic local update — card appears instantly
+    // optimistic local update — card appears instantly
     setCustomDeals(prev => [newDeal, ...prev])
 
-    // Broadcast to everyone else on the site
+    // broadcast to everyone else on the site
     fetch('/api/shared-deals', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ ...newDeal, expiresAt }),
     }).catch(() => {}) // fail silently
 
-    // Show confirmation briefly
+    // show confirmation briefly
     setJustAdded(true)
     setTimeout(() => setJustAdded(false), 2000)
 
-    // Reset form
+    // reset form
     setFormTitle(''); setFormBusiness('')
     setFormDiscount(''); setFormDesc(''); setFormMinutes('2')
     setFormCity(city)
   }
 
-  // Pressing Enter in any form field triggers add (if required fields are filled)
+  // pressing Enter in any form field triggers add (if required fields are filled)
   function handleFormKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
     if (e.key === 'Enter' && !e.shiftKey && formTitle.trim() && formBusiness.trim()) {
       e.preventDefault()
@@ -236,7 +232,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
   return (
     <section className="max-w-6xl mx-auto px-6 sm:px-10 pb-28">
 
-      {/* ══ Section header ═══════════════════════════════════════════════════ */}
+      {/* ══ section header ═══════════════════════════════════════════════════ */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#666666] mb-1">
@@ -263,7 +259,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
 
       <div className="h-px bg-[#E0E0E0] mb-6" />
 
-      {/* ══ City quick-select ═════════════════════════════════════════════════ */}
+      {/* ══ city quick-select ═════════════════════════════════════════════════ */}
       <div className="flex items-center gap-2 flex-wrap mb-10">
         <span className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#666666]">
           Explore
@@ -284,7 +280,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
         ))}
       </div>
 
-      {/* ══ Featured deal ══════════════════════════════════════════════════════ */}
+      {/* ══ featured deal ══════════════════════════════════════════════════════ */}
       {showFeatured && featuredDeal && (
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
@@ -298,10 +294,10 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
           </div>
           {/*
             key={featuredDeal.id} is essential here.
-            Without it, React uses positional reconciliation: when a deal moves
+            without it, react uses positional reconciliation: when a deal moves
             between the featured slot and the grid (e.g. on filter change),
-            the DealCard unmounts and remounts, resetting the countdown.
-            With a stable key, React "moves" the component rather than
+            dealcard unmounts and remounts, resetting the countdown.
+            with a stable key, react "moves" the component rather than
             replacing it, so all internal state (countdown timer) is preserved.
           */}
           <DealCard
@@ -326,12 +322,12 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
         </div>
       )}
 
-      {/* ══ Filters ═══════════════════════════════════════════════════════════ */}
+      {/* ══ filters ═══════════════════════════════════════════════════════════ */}
       <div className="mb-6">
         <Filters activeFilter={activeFilter} onChange={setActiveFilter} />
       </div>
 
-      {/* ══ Deal grid ══════════════════════════════════════════════════════════ */}
+      {/* ══ deal grid ══════════════════════════════════════════════════════════ */}
       {filtered.length === 0 ? (
         <EmptyState
           filter={activeFilter}
@@ -355,9 +351,9 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
         </div>
       )}
 
-      {/* ══ Missed deals ══════════════════════════════════════════════════════
-          Shown only after a deal's countdown hits zero this session.
-          Grayscale + opacity makes them feel "past" vs the live deals above.
+      {/* ══ missed deals ══════════════════════════════════════════════════════
+          shown only after a deal's countdown hits zero this session.
+          grayscale + opacity makes them feel "past" vs the live deals above.
       ═══════════════════════════════════════════════════════════════════════ */}
       {missedDeals.length > 0 && (
         <div className="mt-16">
@@ -402,10 +398,9 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
         </div>
       )}
 
-      {/* ══ Add deal panel ════════════════════════════════════════════════════
-          Fill in title + business, then press Enter (or Tab through to the
-          last field) — the deal appears instantly without clicking any button.
-          It's also broadcast to everyone else currently on the page.
+      {/* ══ add deal panel ════════════════════════════════════════════════════
+          fill in title + business, press Enter — deal appears instantly
+          for all visitors and starts counting down live.
       ═══════════════════════════════════════════════════════════════════════ */}
       <div className="mt-10 border border-dashed border-[#C8C8C8] rounded-2xl overflow-hidden">
 
@@ -522,8 +517,8 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
                   step="0.1"
                   value={formMinutes}
                   onChange={e => setFormMinutes(e.target.value)}
-                  // Pressing Enter in a number input doesn't trigger form submit
-                  // in all browsers — add explicit onKeyDown as a fallback
+                  // pressing Enter in a number input doesn't always trigger form submit
+                  // in all browsers — explicit onKeyDown as a fallback
                   onKeyDown={e => {
                     if (e.key === 'Enter' && formTitle.trim() && formBusiness.trim()) {
                       e.preventDefault()
@@ -547,7 +542,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
                 />
               </div>
 
-              {/* Confirmation / submit row */}
+              {/* confirmation / submit row */}
               <div className="sm:col-span-2 flex items-center gap-3 pt-1">
                 {justAdded ? (
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">

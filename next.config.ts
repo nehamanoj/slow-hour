@@ -1,39 +1,30 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /**
-   * serverExternalPackages: tells Next.js/Turbopack NOT to bundle @vercel/kv.
-   * Instead, Node resolves it at runtime via require(). This stops Turbopack
-   * from emitting "Module not found" warnings when the package isn't installed
-   * locally. On Vercel, the package IS installed (it's in package.json and
-   * Vercel runs npm install), so it resolves fine in production. The try/catch
-   * in shared-deals/route.ts handles the local dev fallback to in-memory store.
-   */
+  // tells next.js/turbopack not to bundle @vercel/kv — resolve it at runtime instead.
+  // without this, turbopack throws "module not found" when the package isn't
+  // installed locally. in production vercel installs it automatically.
+  // the try/catch in shared-deals/route.ts handles the local dev fallback.
   serverExternalPackages: ['@vercel/kv'],
 
-  /**
-   * Deliberately lean config — no unnecessary plugins or overrides.
-   *
-   * Architecture notes (for interview discussion):
-   *
-   * WHY no image optimization domains?
-   * → We use emoji + Lucide SVG icons instead of remote images.
-   *   This avoids external image fetch latency entirely and removes
-   *   a class of CLS issues caused by unsized remote images.
-   *
-   * WHY no rewrites for city routing?
-   * → City is a query param (?city=Austin), not a path segment (/austin).
-   *   Trade-off: query params don't require route segments, making the
-   *   edge function simpler. Path-based routing would improve SEO for
-   *   city-specific pages — a v2 consideration.
-   *
-   * FUTURE: Partial Prerendering (PPR)
-   * → Ideal architecture for this app: static shell (hero, nav) cached
-   *   at CDN edge indefinitely; dynamic slot (deals feed) rendered per-request.
-   *   Currently experimental. Would look like:
-   *   experimental: { ppr: true }
-   *   + export const experimental_ppr = true on the page
-   */
+  // deliberately lean config — no unnecessary plugins or overrides.
+  //
+  // no image optimization domains:
+  //   using emoji + lucide svg icons instead of remote images.
+  //   avoids external image fetch latency and a whole class of CLS issues
+  //   from unsized remote images.
+  //
+  // no rewrites for city routing:
+  //   city is a query param (?city=Austin), not a path segment (/austin).
+  //   trade-off: simpler edge function routing but worse SEO for city pages.
+  //   path-based routing would be a v2 thing.
+  //
+  // future: partial prerendering (PPR)
+  //   ideal architecture: static shell (hero, nav) cached at CDN indefinitely,
+  //   dynamic slot (deals feed) rendered per-request. currently experimental.
+  //   would look like:
+  //     experimental: { ppr: true }
+  //     + export const experimental_ppr = true on the page
 }
 
 export default nextConfig

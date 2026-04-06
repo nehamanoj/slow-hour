@@ -3,6 +3,8 @@
 @tailwind components;
 
 /* ─── Design Tokens ───────────────────────────────────────────────────────── */
+/* I analyzed from 21st.dev + Pinterest -> Style Guide generated. */
+
 :root {
   --bg:          #FAFAF9;   /* warm off-white — not clinical, not dingy */
   --surface:     #FFFFFF;   /* card surfaces */
@@ -67,3 +69,4 @@ h1, h2, h3, h4 {
 
 /* ─── Utility: thin horizontal rule ──────────────────────────────────────── */
 .rule { height: 1px; background: var(--border); width: 100%; }
+

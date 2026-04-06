@@ -3,19 +3,12 @@ import { DM_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-/**
- * Font: DM Sans
- *
- * Chosen for its clean, geometric quality that reads as "Apple-modern"
- * without using a proprietary font. Key properties:
- * - Slightly rounded terminals → friendly, not corporate
- * - Excellent at both display (thin) and body (regular) weights
- * - Optical sizing at large scales keeps headlines crisp
- *
- * We load weights 300 (light for display) and 400/500 (body/label).
- * `display: 'swap'` prevents FOIT — text renders in fallback immediately,
- * swaps to DM Sans once loaded. Fallback is system-ui which looks fine.
- */
+// using dm sans — clean geometric feel without being too corporate.
+// slightly rounded terminals read as friendly. works well at both display
+// (light/300) and body (regular/400-500) weights.
+//
+// display: 'swap' prevents FOIT — text renders in system-ui immediately,
+// swaps to dm sans once loaded. fallback looks fine.
 const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600'],
@@ -43,12 +36,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-[family-name:var(--font-dm)] min-h-screen bg-[#FAFAF9] antialiased">
         {children}
         {/*
-          Vercel Analytics — zero-config, privacy-first web analytics.
-          Tracks page views and Core Web Vitals (LCP, CLS, FCP) automatically.
-          Data surfaces in the Vercel dashboard under the Analytics tab.
-          No cookies, no GDPR banner needed — data is aggregated, not personal.
-          In a customer conversation: "You get CWV monitoring out of the box —
-          no third-party script, no performance penalty, just add one component."
+          vercel analytics — zero-config, privacy-first web analytics.
+          tracks page views and core web vitals (LCP, CLS, FCP) automatically.
+          no cookies, no gdpr banner needed — data is aggregated, not personal.
+          in a customer convo: "you get CWV monitoring out of the box —
+          no third-party script, no performance penalty, just one component."
         */}
         <Analytics />
       </body>

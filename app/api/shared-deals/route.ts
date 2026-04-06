@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-/**
- * POST /api/shared-deals  — broadcast a new deal to all connected clients
- * GET  /api/shared-deals  — fetch all active shared deals for a city
- *
- * STORAGE STRATEGY — two-tier with automatic fallback:
- *
- * Tier 1 (production): Vercel KV (Redis)
- *   Deals are written to a KV key per city. Because KV is a shared,
- *   persistent store outside any single serverless instance, every
- *   Vercel function replica reads and writes the same data — so a deal
- *   added from Houston is immediately visible to a visitor in California.
- *
- *   To enable: Vercel dashboard → your project → Storage → Create KV →
- *   Connect to project. Vercel auto-injects KV_REST_API_URL and
- *   KV_REST_API_TOKEN as env vars. Redeploy and cross-user sync works.
- *
- * Tier 2 (local dev / KV not configured): in-process memory
- *   Falls back to a module-level array. Works within a single Node.js
- *   instance — fine for local development, not for cross-user sharing on
- *   a multi-instance deployment.
- *
- * This pattern — code-level abstraction with env-var detection — is how
- * you'd pitch this to a customer: "zero extra infrastructure for dev,
- * one dashboard click to go production-grade."
- */
+// POST /api/shared-deals  — broadcast a new deal to all connected clients
+// GET  /api/shared-deals  — fetch all active shared deals for a city
+//
+// storage strategy — two-tier with automatic fallback:
+//
+// tier 1 (production): Vercel KV aka now (Redis)
+//   deals are written to a KV key per city. because KV is a shared,
+//   persistent store outside any single serverless instance, every
+//   vercel function replica reads and writes the same data — so a deal
+//   added from houston is immediately visible to a visitor in california.
+//
+//   to enable: vercel dashboard → your project → Storage → Create KV →
+//   Connect to project. vercel auto-injects KV_REST_API_URL and
+//   KV_REST_API_TOKEN as env vars. redeploy and cross-user sync works.
+//
+// tier 2 (local dev / KV not configured): in-process memory
+//   falls back to a module-level array. works within a single Node.js
+//   instance — fine for local dev, not for cross-user sharing on
+//   a multi-instance deployment.
+//
+// pitch to a customer: "zero extra infrastructure for dev,
+// one dashboard click to go production-grade."
 
 export type SharedDeal = {
   id:          string
@@ -35,28 +32,25 @@ export type SharedDeal = {
   category:    string
   discount:    string
   emoji:       string
-  /** Absolute UTC ms timestamp — all clients see the same countdown */
+  /** absolute UTC ms timestamp — all clients see the same countdown */
   expiresAt:   number
 }
 
-// ── Storage abstraction ───────────────────────────────────────────────────────
+// ── storage abstraction ───────────────────────────────────────────────────────
 
 const hasKV = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
 
-// In-memory fallback — single instance only
+// in-memory fallback — single instance only
 const memStore: SharedDeal[] = []
 
 function cityKey(city: string) {
   return `shared-deals:${city.toLowerCase().replace(/\s+/g, '-')}`
 }
 
-/*
- * kvImport: uses new Function() so Turbopack/webpack cannot statically
- * analyse the import specifier. This prevents "Module not found" warnings
- * when @vercel/kv isn't installed locally (the package is only needed in
- * production where Vercel installs it automatically). The try/catch below
- * handles the runtime fallback to in-memory when the package is absent.
- */
+// kvImport: uses new Function() so turbopack/webpack can't statically
+// analyse the import specifier. prevents "module not found" warnings
+// when @vercel/kv isn't installed locally. try/catch handles the runtime
+// fallback to in-memory when the package is absent.
 // eslint-disable-next-line @typescript-eslint/no-implied-eval
 const kvImport = new Function('m', 'return import(m)')
 
@@ -84,7 +78,7 @@ async function persistDeal(deal: SharedDeal): Promise<void> {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const existing = ((await kv.get(key)) as SharedDeal[] | null) ?? []
 
-      // Deduplicate + evict expired in one pass
+      // deduplicate + evict expired in one pass
       const now = Date.now()
       const updated = existing.filter((d: SharedDeal) => d.expiresAt > now && d.id !== deal.id)
       updated.push(deal)
@@ -109,7 +103,7 @@ function evictMemExpired() {
   }
 }
 
-// ── Route handlers ────────────────────────────────────────────────────────────
+// ── route handlers ────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   if (!hasKV) evictMemExpired()

@@ -1,24 +1,21 @@
 'use client'
 
-/**
- * TopBar — Floating pill navigation.
- *
- * Design: a rounded card that floats above the page with a shadow,
- * rather than a full-width bar stuck to the top edge. This is the
- * pattern used by Vercel, Linear, and Loom's marketing sites —
- * it feels modern and doesn't dominate the page.
- *
- * Implementation:
- *   - Outer wrapper: fixed + full-width, pointer-events-none so the
- *     transparent gap around the pill doesn't block page clicks
- *   - Inner pill: max-w-6xl mx-auto with rounded corners + shadow,
- *     pointer-events-auto restores clickability on the pill itself
- *
- * CLOCK: city-local timezone via CITY_TIMEZONES[city] in toLocaleTimeString.
- * WEATHER: fetched client-side after mount — progressive enhancement.
- * CITY SWITCH: router.push(..., { scroll: false }) so switching city
- *   doesn't snap the page back to the top. The content re-renders in place.
- */
+// topbar — floating pill navigation.
+//
+// design: rounded card that floats above the page with a shadow,
+// rather than a full-width bar stuck to the top edge. pattern used by
+// vercel, linear, and loom's marketing sites.
+//
+// implementation:
+//   outer wrapper: fixed + full-width, pointer-events-none so the
+//   transparent gap around the pill doesn't block page clicks.
+//   inner pill: max-w-6xl mx-auto with rounded corners + shadow,
+//   pointer-events-auto restores clickability on the pill itself.
+//
+// clock: city-local timezone via CITY_TIMEZONES[city] in toLocaleTimeString.
+// weather: fetched client-side after mount — progressive enhancement.
+// city switch: router.push(..., { scroll: false }) so switching city
+//   doesn't snap the page back to the top.
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -33,18 +30,16 @@ interface TopBarProps {
   detectedCity: SupportedCity
   isDetected: boolean
   /**
-   * When the user's real geo city is unsupported (e.g. "Fremont"), this is
-   * the raw detected city name to show in the pill instead of the fallback
-   * supported city. Weather and clock are suppressed when this is set since
-   * we don't have coordinates or timezone data for unsupported cities.
+   * when the user's real geo city is unsupported (e.g. "Fremont"), this is
+   * the raw detected city name to show in the pill. weather and clock are
+   * suppressed when this is set — no coords or timezone for unsupported cities.
    */
   rawCity?: string
 }
 
 export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopBarProps) {
-  // When rawCity is set, the user is in an unsupported city.
-  // We show rawCity in the pill but suppress weather/clock — we have no
-  // coords or timezone for cities outside our supported set.
+  // when rawCity is set the user is in an unsupported city —
+  // show rawCity in the pill but suppress weather/clock
   const isUnsupportedCity = rawCity !== undefined
   const pillLabel = rawCity ?? city
   const router = useRouter()
@@ -90,19 +85,19 @@ export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopB
   return (
     <>
       {/*
-        Outer: fixed + full-width + pointer-events-none.
-        The px-4 creates a visible gap on each side so the pill appears
-        to float rather than stick to the viewport edge.
+        outer: fixed + full-width + pointer-events-none.
+        px-4 creates a visible gap so the pill appears to float
+        rather than stick to the viewport edge.
       */}
       <div className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
         <div className="max-w-6xl mx-auto pointer-events-auto">
 
-          {/* ── The floating pill ─────────────────────────────────────────── */}
+          {/* ── the floating pill ─────────────────────────────────────────── */}
           <div className="bg-white/92 backdrop-blur-2xl border border-[#E0E0E0]/90 rounded-full shadow-lg shadow-black/[0.07] px-4 sm:px-5 h-13 flex items-center justify-between"
             style={{ height: '52px' }}
           >
 
-            {/* Logo + wordmark */}
+            {/* logo + wordmark */}
             <Link href="/" className="flex items-center gap-2 group" aria-label="Slow Hour home">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#080808] group-hover:bg-indigo-600 transition-colors duration-200 shadow-sm">
                 <MapPin className="w-3 h-3 text-white" strokeWidth={2.5} />
@@ -115,10 +110,10 @@ export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopB
               </span>
             </Link>
 
-            {/* Right side */}
+            {/* right side */}
             <div className="flex items-center gap-2.5">
 
-              {/* Weather — hidden for unsupported cities (no coords available) */}
+              {/* weather — hidden for unsupported cities (no coords available) */}
               {!isUnsupportedCity && weather && (
                 <span className="hidden sm:flex items-center gap-1 text-xs text-[#666666] animate-fade-in bg-[#F5F5F5] px-2.5 py-1 rounded-full">
                   <span>{weather.icon}</span>
@@ -126,14 +121,14 @@ export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopB
                 </span>
               )}
 
-              {/* Local time — hidden for unsupported cities (no timezone mapping) */}
+              {/* local time — hidden for unsupported cities (no timezone mapping) */}
               {!isUnsupportedCity && time && (
                 <span className="hidden sm:block text-xs font-mono tabular-nums text-[#666666] bg-[#F5F5F5] px-2.5 py-1 rounded-full">
                   {time}
                 </span>
               )}
 
-              {/* City picker */}
+              {/* city picker */}
               <div className="relative">
                 <button
                   onClick={() => setShowPicker(v => !v)}
@@ -188,7 +183,7 @@ export default function TopBar({ city, detectedCity, isDetected, rawCity }: TopB
         </div>
       </div>
 
-      {/* Backdrop for closing picker */}
+      {/* backdrop for closing picker — invisible full-screen div behind the dropdown */}
       {showPicker && (
         <div className="fixed inset-0 z-40" onClick={() => setShowPicker(false)} aria-hidden="true" />
       )}

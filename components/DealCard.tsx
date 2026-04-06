@@ -5,31 +5,30 @@ import { Clock, Copy, Check } from 'lucide-react'
 import type { Deal, Category } from '@/lib/types'
 import { formatCountdown } from '@/lib/time'
 
-// ─── Category system ──────────────────────────────────────────────────────────
-// Each category gets:
-//   dot   — the colored dot inside the badge pill
-//   bg    — the badge pill background
-//   text  — the badge pill text color
-//   card  — the card's own background tint (very subtle — ~4% opacity)
-//           This gives each card a hint of personality without being loud.
-//           Think: Notion's colored page icons but for card backgrounds.
+// category color system — each category gets:
+//   dot   — colored dot inside the badge pill
+//   bg    — badge pill background
+//   text  — badge pill text color
+//   card  — card's own background tint (~4% opacity)
+//           subtle personality per card without being loud.
+//           think: notion's colored page icons but for card backgrounds.
 const CATEGORY_STYLES: Record<Category, { dot: string; bg: string; text: string; card: string }> = {
-  Food:    { dot: 'bg-orange-300',  bg: 'bg-orange-50',  text: 'text-orange-700',  card: 'bg-orange-50/40'  }, // warm peach
-  Drinks:  { dot: 'bg-violet-300',  bg: 'bg-violet-50',  text: 'text-violet-700',  card: 'bg-violet-50/40'  }, // soft lavender
-  Events:  { dot: 'bg-emerald-300', bg: 'bg-emerald-50', text: 'text-emerald-700', card: 'bg-emerald-50/40' }, // sage green
-  Fitness: { dot: 'bg-sky-300',     bg: 'bg-sky-50',     text: 'text-sky-700',     card: 'bg-sky-50/40'     }, // sky blue
-  Retail:  { dot: 'bg-rose-300',    bg: 'bg-rose-50',    text: 'text-rose-700',    card: 'bg-rose-50/40'    }, // coral rose
-  Study:   { dot: 'bg-amber-300',   bg: 'bg-amber-50',   text: 'text-amber-700',   card: 'bg-amber-50/40'   }, // warm gold
+  Food:    { dot: 'bg-orange-300',  bg: 'bg-orange-50',  text: 'text-orange-700',  card: 'bg-orange-50/40'  },
+  Drinks:  { dot: 'bg-violet-300',  bg: 'bg-violet-50',  text: 'text-violet-700',  card: 'bg-violet-50/40'  },
+  Events:  { dot: 'bg-emerald-300', bg: 'bg-emerald-50', text: 'text-emerald-700', card: 'bg-emerald-50/40' },
+  Fitness: { dot: 'bg-sky-300',     bg: 'bg-sky-50',     text: 'text-sky-700',     card: 'bg-sky-50/40'     },
+  Retail:  { dot: 'bg-rose-300',    bg: 'bg-rose-50',    text: 'text-rose-700',    card: 'bg-rose-50/40'    },
+  Study:   { dot: 'bg-amber-300',   bg: 'bg-amber-50',   text: 'text-amber-700',   card: 'bg-amber-50/40'   },
 }
 
 interface DealCardProps {
   deal: Deal
   index: number
   /**
-   * Absolute expiry timestamp in ms, computed once by the parent and stored
-   * in a stable ref keyed by deal.id. Passed as a prop so this component
+   * absolute expiry timestamp in ms, computed once by the parent and stored
+   * in a stable ref keyed by deal.id. passed as a prop so this component
    * never recomputes it — prevents timer resets when the card re-renders or
-   * temporarily unmounts (e.g. filter changes, Surprise Me clicks).
+   * temporarily unmounts (e.g. filter changes, surprise me clicks).
    */
   expiresAt: number
   isHighlighted: boolean
@@ -44,13 +43,13 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
   const [copied, setCopied] = useState(false)
   const [visible, setVisible] = useState(false)
 
-  // Staggered entrance — each card delays by index × 60ms
+  // staggered entrance — each card delays by index × 60ms
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), index * 60)
     return () => clearTimeout(t)
   }, [index])
 
-  // Live countdown — ticks every second, fades card out on expiry
+  // live countdown — ticks every second, fades card out on expiry
   useEffect(() => {
     const id = setInterval(() => {
       const next = formatCountdown(expiresAt)
@@ -64,7 +63,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
     return () => clearInterval(id)
   }, [expiresAt, onExpired])
 
-  // Copy deal as formatted plain text
+  // copy deal as formatted plain text
   const handleCopy = useCallback(async () => {
     const text = [
       `${deal.emoji} ${deal.title}`,
@@ -84,7 +83,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
   const isUrgent   = deal.expiresInHours <= 2
   const isCritical = deal.expiresInHours <= 1
 
-  // ── FEATURED VARIANT ─────────────────────────────────────────────────────
+  // ── featured variant ─────────────────────────────────────────────────────
   if (variant === 'featured') {
     return (
       <article
@@ -98,7 +97,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
           transitionDuration: isExpired ? '800ms' : '500ms',
         }}
       >
-        {/* Urgency gradient bar — thicker on featured */}
+        {/* urgency gradient bar — thicker on featured */}
         <div
           className={`h-[3px] w-full ${
             isCritical
@@ -108,7 +107,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
         />
 
         <div className="p-8 sm:p-10">
-          {/* Header row */}
+          {/* header row */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <span className="text-3xl" role="img" aria-label={deal.category}>{deal.emoji}</span>
@@ -120,7 +119,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
               </div>
             </div>
 
-            {/* Discount badge — large on featured */}
+            {/* discount badge — large on featured */}
             <span className={`text-sm font-bold px-4 py-2 rounded-full shrink-0 ${
               isCritical ? 'bg-rose-500 text-white' :
               isUrgent   ? 'bg-amber-100 text-amber-700' :
@@ -130,7 +129,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
             </span>
           </div>
 
-          {/* Title — large */}
+          {/* title — large */}
           <div className="select-text mb-6">
             <h3 className="text-2xl sm:text-3xl font-light tracking-tight text-[#0C0C0C] leading-snug mb-2">
               {deal.title}
@@ -141,9 +140,9 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
             )}
           </div>
 
-          {/* Footer row */}
+          {/* footer row */}
           <div className="flex items-center justify-between">
-            {/* Countdown — prominent on featured */}
+            {/* countdown — prominent on featured */}
             <div className={`flex items-center gap-2 ${
               isCritical ? 'text-rose-500' : isUrgent ? 'text-amber-500' : 'text-[#A3A3A3]'
             }`}>
@@ -171,7 +170,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
     )
   }
 
-  // ── DEFAULT VARIANT ───────────────────────────────────────────────────────
+  // ── default variant ───────────────────────────────────────────────────────
   return (
     <article
       id={`deal-${deal.id}`}
@@ -190,7 +189,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
         transitionDelay: isExpired ? '0ms' : `${index * 40}ms`,
       }}
     >
-      {/* Urgency top stripe */}
+      {/* urgency top stripe — only shown when urgent */}
       {isUrgent && (
         <div className={`absolute top-0 left-0 right-0 h-[2px] ${
           isCritical
@@ -200,7 +199,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
       )}
 
       <div className="p-6">
-        {/* Header */}
+        {/* header */}
         <div className="flex items-start justify-between gap-3 mb-5">
           <div className="flex items-center gap-2.5">
             <span className="text-[22px] leading-none" role="img" aria-label={deal.category}>
@@ -221,7 +220,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
           </span>
         </div>
 
-        {/* Body */}
+        {/* body */}
         <div className="select-text mb-5">
           <h3 className="font-medium text-[15px] leading-snug text-[#0C0C0C] mb-1.5 tracking-[-0.01em]">
             {deal.title}
@@ -230,7 +229,7 @@ export default function DealCard({ deal, index, expiresAt, isHighlighted, onExpi
           <p className="text-xs text-[#A3A3A3] leading-relaxed">{deal.description}</p>
         </div>
 
-        {/* Footer */}
+        {/* footer */}
         <div className="flex items-center justify-between pt-4 border-t border-[#F5F5F5]">
           <div className={`flex items-center gap-1.5 ${
             isCritical ? 'text-rose-500' : isUrgent ? 'text-amber-500' : 'text-[#A3A3A3]'

@@ -1,27 +1,18 @@
 'use client'
 
-/**
- * AnimatedCity — Client component for animating the city name in Hero.
- *
- * WHY CLIENT COMPONENT?
- * The parent Hero is a server component (no 'use client') so it can't
- * own any state or run effects. We extract just the animated city span
- * into a tiny client component — keeping as little JS as possible on
- * the client while enabling the transition effect.
- *
- * HOW IT WORKS:
- * When the city prop changes (user switches city → router.push('/discover?city=X')),
- * the parent re-renders with a new `city` prop. This component:
- *   1. Detects the prop change via useEffect
- *   2. Fades out (opacity 0, slides up 8px)
- *   3. After 180ms: updates displayCity to the new name
- *   4. Fades back in (opacity 1, returns to 0px)
- *
- * PERFORMANCE:
- * Uses only `opacity` and `transform` — compositor-thread only.
- * Zero layout recalculations, zero CLS. The span occupies the same
- * space before and after the transition.
- */
+// why client component?
+// the parent Hero is a server component so it can't own state or run effects.
+// we extract just the animated city span into a tiny client component —
+// as little JS on the client as possible while still enabling the transition.
+//
+// how it works:
+//   when the city prop changes (user switches city → router.push('/discover?city=X')):
+//   1. detects the prop change via useEffect
+//   2. fades out (opacity 0, slides up 8px)
+//   3. after 180ms: updates displayCity to the new name
+//   4. fades back in (opacity 1, returns to 0px)
+//
+// only uses opacity + transform — compositor-thread only, zero CLS.
 
 import { useState, useEffect } from 'react'
 
@@ -36,10 +27,10 @@ export default function AnimatedCity({ city }: AnimatedCityProps) {
   useEffect(() => {
     if (city === displayCity) return
 
-    // Step 1: start fade-out
+    // step 1: start fade-out
     setAnimating(true)
 
-    // Step 2: after fade-out completes (180ms), swap text and fade in
+    // step 2: after fade-out completes (180ms), swap text and fade in
     const t = setTimeout(() => {
       setDisplayCity(city)
       setAnimating(false)
@@ -48,13 +39,11 @@ export default function AnimatedCity({ city }: AnimatedCityProps) {
     return () => clearTimeout(t)
   }, [city, displayCity])
 
+  // no box/pill — just indigo text inline with the sentence.
+  // bold weight + color is enough to signal "this word is dynamic."
+  // a surrounding shape caused awkward line-breaks with short city
+  // names like "Austin" and looked boxy next to flowing body copy.
   return (
-    /*
-     * No box/pill — just indigo text inline with the sentence.
-     * Bold weight + color is enough to signal "this word is dynamic."
-     * A surrounding shape caused awkward line-breaks with short city
-     * names like "Austin" and looked boxy next to flowing body copy.
-     */
     <span
       className="font-semibold text-indigo-500 inline-block"
       style={{

@@ -1,13 +1,10 @@
-/**
- * UnsupportedCity — "quiet city" state
- *
- * Shown when Vercel's edge geo detection identifies a city we don't have
- * deals data for yet (e.g., Fremont, CA). Instead of showing an empty feed
- * or silently falling back to Houston, we acknowledge the user's location
- * and direct them to a supported city they might want to explore.
- *
- * This is a pure server component — no client JS needed, just links.
- */
+// unsupportedcity — "quiet city" state
+//
+// shown when vercel's edge geo detects a city we don't have deals for yet
+// (e.g. fremont, CA). instead of showing an empty feed or silently falling
+// back to houston, we acknowledge the user's location and direct them somewhere useful.
+//
+// pure server component — no client JS needed, just links.
 
 import Link from 'next/link'
 import { SUPPORTED_CITIES } from '@/lib/types'
@@ -29,17 +26,17 @@ export default function UnsupportedCity({ city }: UnsupportedCityProps) {
   return (
     <section className="max-w-6xl mx-auto px-6 sm:px-10 pb-28">
 
-      {/* Thin rule matching DealsClient header */}
+      {/* thin rule matching dealsclient header */}
       <div className="h-px bg-[#E0E0E0] mb-10" />
 
       <div className="max-w-xl">
 
-        {/* Label */}
+        {/* label */}
         <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#666666] mb-3">
           Near you
         </p>
 
-        {/* Main message */}
+        {/* main message */}
         <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-[#080808] leading-snug mb-3">
           {city} seems quiet right now.
         </h2>
@@ -48,7 +45,7 @@ export default function UnsupportedCity({ city }: UnsupportedCityProps) {
           In the meantime, see what&apos;s happening somewhere nearby:
         </p>
 
-        {/* City buttons */}
+        {/* city buttons */}
         <div className="flex flex-wrap gap-3">
           {SUPPORTED_CITIES.map((c) => (
             <Link
