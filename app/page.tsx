@@ -184,7 +184,7 @@ export default function LandingPage() {
 
               {/* Featured card — relative wrapper lets the glow bleed outside overflow-hidden */}
               <div className="relative">
-                <div className="absolute -inset-4 -z-10 bg-gradient-to-br from-rose-200/30 via-orange-100/20 to-transparent rounded-[2.5rem] blur-2xl pointer-events-none" aria-hidden />
+                <div className="absolute -inset-8 -z-10 bg-gradient-to-br from-rose-300/60 via-orange-200/50 to-amber-100/30 rounded-[3rem] blur-3xl pointer-events-none" aria-hidden />
               <div className="rounded-3xl overflow-hidden shadow-md shadow-orange-100/60 bg-orange-50/40 border border-white/70">
                 <div className="h-[3px] bg-gradient-to-r from-rose-400 via-red-400 to-orange-400" />
                 <div className="p-6">

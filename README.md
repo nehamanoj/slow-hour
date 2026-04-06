@@ -1,23 +1,35 @@
 # Slow Hour
 
-A real-time local deals app for students. You open it, it knows where you are, and it shows you what's ending soon nearby — coffee deals, happy hours, fitness classes, whatever's live right now.
+A real-time local deals app to bridge students and small businesses. You open it, it knows where you are, and it shows you what's ending soon nearby — coffee deals, happy hours, fitness classes, whatever's live right now. Reviving local businesses & rebuilding community after COVID-19 - _Slow Hour_
 
 ---
 
+## Inspiration
+
+The relentless grip of COVID-19 sent shock through our global economy, leaving behind desperation. In the aftermath of the pandemic, the battle for survival was vital for small businesses as they desperately tried to stay afloat. The once buzzing tapestry of local businesses now bears the scars of widespread closures, affecting not just local communities but beyond.
+
+A sharp decline in the number of active business owners hurts these small establishments as those individuals striving to make a living, face unprecedented challenges. Even today, the once lively buzz of local businesses remains subdued, with no resounding revival in sight even today.
+
+According to a stark report from the NCBI, the period between February and April 2020 witnessed over 3.3 million businesses rendered inactive, marking a staggering 22 percent decline. This alarming plunge in active businesses stands as the largest ever recorded in the U.S., echoing a profound loss of business activity cutting across nearly all industries. And this has continued for the past 4-years (NCBI).
+
+It’s vital for small businesses to endure and thrive as a matter of economic survival- to resonate as a testament to standing against adversity that echoes far beyond the confines of commerce. The journey to recovery is fraught with challenges, yet the heartbeat of local entrepreneurship perseveres, urging us all to stand united and rebuild what the pandemic sought to dismantle.
+
 ## Why I built this
+
+There is a huge community of students, especially in college towns. Students are looking for things to do on weekends, and spend money on a day to day. Especially after COVID-19, they’re looking for ways to go out and about. We need to connect them to local businesses, that may have limited resources to market and advertise, looking to make business.
 
 I kept noticing the same thing: local spots (especially coffee shops and small restaurants) have these dead hours in the afternoon where they're basically empty, and they don't have a good way to get the word out fast. At the same time, students are always looking for cheap things to do nearby and nobody has really built something for that specific moment — not "what's happening this weekend", but "what's happening in the next two hours near me."
 
 The existing options don't really cut it:
-- **Instagram** — only works if you already follow the business
-- **Groupon** — not real-time, not location-sensitive
-- **Eventbrite** — built for big planned events, not spontaneous stuff
+- **Instagram** eans you have to discover the business.
+- **Groupon** doesn’t allow time and proximity-based deals to pop up.
+- **Eventbrite** doesn’t allow for deals/sales to be advertised and is not very lightweight.
 
 Slow Hour is for the small, time-sensitive, right-now moment.
 
 ---
 
-## What it does
+## What it does + Next.JS integrations
 
 - Detects your city automatically at the edge — no GPS prompt, no location permission
 - Shows a live feed of deals ranked by how soon they expire, not how recently they were posted
@@ -31,24 +43,11 @@ Slow Hour is for the small, time-sensitive, right-now moment.
 
 The `/discover` page runs on **Vercel Edge Runtime**. The moment a request comes in, the geo header is read, Hero and TopBar render and stream to the client right away. The deals grid is behind a `<Suspense>` boundary — it loads in parallel and streams in once ready, with a skeleton that matches the real layout exactly so there's no layout shift.
 
-```
-request → edge
-  ↓
-headers() + searchParams → resolved in parallel (Promise.all)
-  ↓
-Hero + TopBar → streamed immediately (first HTML chunk)
-  ↓
-<Suspense boundary>
-  DealsGrid (async server) → awaits getDeals() + fetchWeather() in parallel
-  ↓
-DealsClient hydrates → starts 5s polling for shared deals
-```
-
 I looked at using PPR (Partial Prerendering) but it didn't make sense here — the hero headline includes the city name, so there's no meaningful static shell to cache. Every request is personalized from the start.
 
 ---
 
-## Decisions worth explaining
+## Decisions I Mapped
 
 **Why not GPS?**
 Edge geo headers are instant and require zero user interaction. The `x-vercel-ip-city` value is already there on every request — no permission modal, no async wait.
@@ -65,22 +64,10 @@ Hero is a pure server component — it's the LCP element and I didn't want any J
 **"Ending soon" is a virtual filter:**
 It doesn't refetch — it just re-sorts the current visible set by time remaining. Felt more honest to the user than pretending it's a separate data category.
 
----
-
-## Client boundary breakdown
-
-| Component | Server or Client | Reason |
-|---|---|---|
-| `Hero` | server | LCP element — no JS on critical path |
-| `AnimatedCity` | client | needs `useState` for city name crossfade |
-| `TopBar` | client | scroll detection, live clock, weather fetch |
-| `DealsGrid` | async server | data fetch + ranking happens server-side |
-| `DealsClient` | client | filters, polling, optimistic updates, timers |
-| `DealCard` | client | per-card countdown interval, copy to clipboard |
 
 ---
 
-## Tech
+## Tech Stack for my FrontEnd Cloud
 
 - **Next.js 15** — App Router, Edge Runtime, React Streaming, Server Components
 - **Vercel** — Edge geo headers, KV (Redis), Analytics
@@ -89,38 +76,6 @@ It doesn't refetch — it just re-sorts the current visible set by time remainin
 - **Open-Meteo** for weather — free, no API key, CORS-enabled
 - **DM Sans** via `next/font` with `display: swap`
 - **Vitest** with `vi.useFakeTimers()` for countdown tests
-
----
-
-## Project structure
-
-```
-app/
-  page.tsx                  — static landing page
-  discover/page.tsx         — edge runtime, geo detection, streaming boundary
-  api/weather/route.ts      — separate route because TopBar is a client component
-  api/shared-deals/route.ts — two-tier KV + memory storage, city-namespaced
-
-components/
-  Hero.tsx                  — server component, LCP element
-  AnimatedCity.tsx          — minimal client boundary for city crossfade
-  TopBar.tsx                — floating nav, city picker, live clock, weather
-  DealsGrid.tsx             — async server component, parallel fetch
-  DealsClient.tsx           — client hub: filters, polling, optimistic updates
-  DealCard.tsx              — countdown timer, two layout variants
-  LoadingSkeleton.tsx       — Suspense fallback, matches DealsClient layout exactly
-  Filters.tsx               — tab bar with ARIA
-  EmptyState.tsx            — different state for filtered vs. no deals at all
-  UnsupportedCity.tsx       — shown when geo isn't in the supported list
-
-lib/
-  types.ts                  — domain types, SUPPORTED_CITIES as const literal union
-  geo.ts                    — city detection + fuzzy normalization
-  time.ts                   — countdown formatting, expiry math
-  ranking.ts                — urgency sort + category filter logic
-  weather.ts                — WMO code → readable description, Open-Meteo fetch
-  deals.ts                  — mock deal data for 5 cities
-```
 
 ---
 
@@ -137,21 +92,24 @@ KV_REST_API_URL=
 KV_REST_API_TOKEN=
 ```
 
-Note: city detection from `x-vercel-ip-city` only works once deployed to Vercel. Locally it defaults to Houston.
+Note for locla run: city detection from `x-vercel-ip-city` only works once deployed to Vercel. Locally it defaults to Houston.
 
 ---
 
-## What I'd do next
+## Next Iterations: Beyond MVP
 
 Near-term:
 - **Real deal data** — right now it's all mocks. Next step is an authenticated `/business` route (probably Clerk + Supabase) where businesses post deals; the KV + polling infrastructure is already there
-- **Distance ranking** — `x-vercel-ip-latitude` and `x-vercel-ip-longitude` are already injected by Vercel on every edge request, I'm just not using them yet
-- **Push notifications** — let users subscribe to a business or category and get alerted when something new is posted in their city
+- **Distance ranking** — `x-vercel-ip-latitude` and `x-vercel-ip-longitude` are already injected by Vercel on every edge request, I'm just not using them yet due to scope clarity
+- **Push notifications & Personalization** — let users subscribe to a business or category and get alerted when something new is posted in their city or newsletters & texts when deals ending
 
 Longer-term:
-- **More cities** — only one line to change in `lib/types.ts` and the rest of the app picks it up automatically
+- **More cities** — allow new cities to automatically be selected.
 - **Campus-specific feeds** — verified student discounts, university partnerships
 - **Native app** — the edge geo + streaming architecture would translate well to React Native + Expo
+
+Current Notes:
+- For this Iteration, I wanted to keep scope tight for clarity & structure purposes. Hence limit of few MVP cities to allow controlled development.
 
 ---
 
