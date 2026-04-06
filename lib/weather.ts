@@ -18,12 +18,12 @@ function interpretWeatherCode(code: number): { condition: string; icon: string }
 // sunny → "get out and explore". makes the app feel alive without adding complexity.
 function getWeatherMessage(condition: string): string {
   const messages: Record<string, string> = {
-    Clear:          '☀️ Great day to get out and explore',
-    'Partly Cloudy':'⛅ Nice enough to check out a deal', //'Partly Cloudy' is in brackets because there is a space in the string. needs more specification.
-    Foggy:          '🌫️ Cozy day for a café or study spot',
-    Rainy:          '🌧️ Perfect excuse to grab a deal indoors',
-    Snowy:          '❄️ Warm up with a local deal nearby',
-    Showery:        '🌦️ Between showers — grab something good',
+    Clear:          '☀️ Sun is out, so should you. Great day to get out and explore',
+    'Partly Cloudy':'⛅ Cloudy, but perfect to check out a deal', //'Partly Cloudy' is in brackets because there is a space in the string. needs more specification.
+    Foggy:          '🌫️ Foggy days are cozy days for a warm café or study spot',
+    Rainy:          '🌧️ Rainy - perfect excuse to grab a deal indoors',
+    Snowy:          '❄️ Ooh Snowy and chilly - warm up with a local deal nearby',
+    Showery:        '🌦️ Sprinkles of rain means between showers — grab something good',
     Stormy:         '⛈️ Storm day calls for a study deal',
   }
   return messages[condition] ?? '🏙️ Deals waiting nearby'

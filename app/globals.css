@@ -69,4 +69,3 @@ h1, h2, h3, h4 {
 
 /* ─── Utility: thin horizontal rule ──────────────────────────────────────── */
 .rule { height: 1px; background: var(--border); width: 100%; }
-

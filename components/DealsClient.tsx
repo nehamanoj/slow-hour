@@ -236,7 +236,7 @@ export default function DealsClient({ initialDeals, city, weather }: DealsClient
       <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#666666] mb-1">
-            Near you
+            Based on Weather - Near you
           </p>
           <p className="text-base font-light text-[#404040]">
             {weather.message}
