@@ -40,6 +40,27 @@ const MOCK_CARDS = [
     discountColor: 'bg-indigo-100 text-indigo-700', countdown: '1h 20m',
     countdownColor: 'text-amber-500', urgent: false,
   },
+  {
+    emoji: '🏋️', category: 'Fitness', categoryColor: 'text-sky-700 bg-sky-50',
+    dot: 'bg-sky-300', title: 'First class free — any format',
+    business: 'EaDo Fitness · Houston', discount: 'FREE',
+    discountColor: 'bg-sky-100 text-sky-700', countdown: '3h 00m',
+    countdownColor: 'text-[#999999]', urgent: false,
+  },
+  {
+    emoji: '👗', category: 'Retail', categoryColor: 'text-rose-700 bg-rose-50',
+    dot: 'bg-rose-300', title: '20% off vintage clothing today',
+    business: 'Housing Works · New York', discount: '20% OFF',
+    discountColor: 'bg-indigo-100 text-indigo-700', countdown: '4h 15m',
+    countdownColor: 'text-[#999999]', urgent: false,
+  },
+  {
+    emoji: '📖', category: 'Study', categoryColor: 'text-amber-700 bg-amber-50',
+    dot: 'bg-amber-300', title: 'Free quiet study room — 3 hrs',
+    business: 'Austin Central Library · Austin', discount: 'FREE',
+    discountColor: 'bg-indigo-100 text-indigo-700', countdown: '5h 00m',
+    countdownColor: 'text-[#999999]', urgent: false,
+  },
 ]
 
 export default function LandingPage() {
@@ -213,10 +234,16 @@ export default function LandingPage() {
               </div>
               </div>
 
-              {/* 2-card mini grid */}
+              {/* 2×2 mini grid + bottom row — shows all 6 categories */}
               <div className="grid grid-cols-2 gap-3">
                 {MOCK_CARDS.slice(1).map((card, i) => (
-                  <div key={i} className={`rounded-2xl overflow-hidden shadow-sm border border-white/70 ${i === 0 ? 'bg-violet-50/40' : 'bg-emerald-50/40'}`}>
+                  <div key={i} className={`rounded-2xl overflow-hidden shadow-sm border border-white/70 ${
+                    i === 0 ? 'bg-violet-50/40' :
+                    i === 1 ? 'bg-emerald-50/40' :
+                    i === 2 ? 'bg-sky-50/40' :
+                    i === 3 ? 'bg-rose-50/40' :
+                    'bg-amber-50/40'
+                  }`}>
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div className="flex items-center gap-1.5">

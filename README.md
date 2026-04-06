@@ -1,6 +1,6 @@
 # Slow Hour
 
-A real-time local deals app to bridge students and small businesses. You open it, it knows where you are, and it shows you what's ending soon nearby — coffee deals, happy hours, fitness classes, whatever's live right now. Reviving local businesses & rebuilding community after COVID-19 - _Slow Hour_
+A real-time local deals app to bridge students and small businesses. You open it, it knows where you are, and it shows you what's ending soon nearby — coffee deals, happy hours, fitness classes, whatever's live right now. Reviving local businesses & reconnecting community after COVID-19 - _Slow Hour_
 
 ---
 

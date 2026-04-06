@@ -7,13 +7,16 @@
 // inactive: muted gray, hover darkens text.
 // "ending soon" gets rose color to match the urgency aesthetic.
 
-import { LayoutGrid, UtensilsCrossed, Wine, Calendar, Zap } from 'lucide-react'
+import { LayoutGrid, UtensilsCrossed, Wine, Calendar, Dumbbell, ShoppingBag, BookOpen, Zap } from 'lucide-react'
 
 const FILTERS = [
   { id: 'all',         label: 'All',          Icon: LayoutGrid },
   { id: 'food',        label: 'Food',         Icon: UtensilsCrossed },
   { id: 'drinks',      label: 'Drinks',       Icon: Wine },
   { id: 'events',      label: 'Events',       Icon: Calendar },
+  { id: 'fitness',     label: 'Fitness',      Icon: Dumbbell },
+  { id: 'retail',      label: 'Retail',       Icon: ShoppingBag },
+  { id: 'study',       label: 'Study',        Icon: BookOpen },
   { id: 'ending-soon', label: 'Ending soon',  Icon: Zap },
 ] as const
 
@@ -25,7 +28,7 @@ interface FiltersProps {
 export default function Filters({ activeFilter, onChange }: FiltersProps) {
   return (
     <div
-      className="flex items-center gap-1 border-b border-[#E8E8E8]"
+      className="flex items-center gap-1 border-b border-[#E8E8E8] overflow-x-auto"
       role="group"
       aria-label="Filter deals by category"
     >

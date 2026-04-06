@@ -43,4 +43,4 @@ export type SupportedCity = (typeof SUPPORTED_CITIES)[number]
 
 // ─── filter options ───────────────────────────────────────────────────────────
 
-export type FilterId = 'all' | 'food' | 'drinks' | 'events' | 'fitness' | 'ending-soon'
+export type FilterId = 'all' | 'food' | 'drinks' | 'events' | 'fitness' | 'retail' | 'study' | 'ending-soon'
